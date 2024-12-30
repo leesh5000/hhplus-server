@@ -1,0 +1,396 @@
+openapi: 3.1.0
+info:
+  title: E-commerce Service API
+  description: API documentation for E-commerce service
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+paths:
+  /api/v1/users/{userId}/balance:
+    post:
+      summary: User balance recharge
+      description: Recharges the user balance.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: ID of the user
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BalanceRequest'
+
+      responses:
+        '201':
+          description: Balance successfully recharged.
+          headers:
+            Location:
+              description: Location of the recharged balance
+              schema:
+                type: string
+                example: '/api/v1/users/{userId}/balance'
+
+        '400':
+          description: Invalid recharge request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      summary: Get user balance
+      description: Retrieves the user balance.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: ID of the user
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Balance successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponse'
+        '404':
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+
+  /api/v1/users/{userId}/coupons:
+    get:
+      summary: Get user coupons
+      description: Retrieves the list of coupons owned by a user.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: ID of the user
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Coupons successfully retrieved.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CouponResponse'
+
+  /api/v1/products:
+    get:
+      summary: Get product list
+      description: Retrieves the list of products.
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            default: createdAt,desc
+      responses:
+        '200':
+          description: Product list successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageResponse'
+  /api/v1/products/top-sold:
+    get:
+      summary: Get top sold products
+      description: Retrieves top sold products within a specific date range.
+      parameters:
+        - name: startDate
+          in: query
+          required: true
+          description: Start date for the query
+          schema:
+            type: string
+            format: date-time
+        - name: endDate
+          in: query
+          required: true
+          description: End date for the query
+          schema:
+            type: string
+            format: date-time
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 5
+      responses:
+        '200':
+          description: Top sold products successfully retrieved.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TopSoldProductResponse'
+        '400':
+          description: Invalid request period or limit.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/coupons/{couponId}:
+    post:
+      summary: Issue coupon
+      description: Issues a coupon to a user.
+      parameters:
+        - name: couponId
+          in: path
+          required: true
+          description: ID of the coupon
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                  example: user1
+      responses:
+        '201':
+          description: Coupon successfully issued.
+          headers:
+            Location:
+              description: Location of the issued coupon
+              schema:
+                type: string
+        '404':
+          description: Coupon not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Coupon sold out.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/orders:
+    post:
+      summary: Create order
+      description: Creates a new order.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderRequest'
+      responses:
+        '201':
+          description: Order successfully created.
+          headers:
+            Location:
+              description: Location of the created order
+              schema:
+                type: string
+                example: '/api/v1/users/{userId}/orders/{orderId}'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orderId:
+                    type: string
+                    example: 'O001'
+                  totalPrice:
+                    type: integer
+                    example: 5000
+                  orderedAt:
+                    type: date-time
+                    format: date-time
+                    example: 2021-08-01T00:00:00
+        '402':
+          description: Insufficient balance.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Insufficient stock.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '400':
+          description: Invalid coupon.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        errorCode:
+          type: string
+          example: ERROR_CODE
+        message:
+          type: string
+          example: "Error message."
+
+    BalanceRequest:
+      type: object
+      properties:
+        amount:
+          type: integer
+          example: 10000
+
+    BalanceResponse:
+      type: object
+      properties:
+        amount:
+          type: integer
+          example: 10000
+
+    PageResponse:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        size:
+          type: integer
+          example: 10
+        totalElements:
+          type: integer
+          example: 57
+        totalPages:
+          type: integer
+          example: 6
+        sort:
+          type: string
+          example: price,desc
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductResponse'
+
+    ProductResponse:
+      type: object
+      properties:
+        productId:
+          type: string
+          example: P003
+        productName:
+          type: string
+          example: Premium Item
+        price:
+          type: integer
+          example: 30000
+        quantity:
+          type: integer
+          example: 20
+        createdAt:
+          type: date-time
+          format: date-time
+          example: 2021-08-01T00:00:00Z
+
+    CouponResponse:
+      type: object
+      properties:
+        couponId:
+          type: string
+          example: C001
+        issuedAt:
+          type: date-time
+          format: date-time
+          example: 2024-12-30T00:00:00Z
+        expiredAt:
+          type: date-time
+          format: date-time
+          example: 2024-12-30T00:00:00Z
+
+    OrderRequest:
+      type: object
+      properties:
+        userId:
+          type: string
+          example: user1
+        couponId:
+          type: string
+          example: C001
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderProductRequest'
+
+    OrderProductRequest:
+      type: object
+      properties:
+        productId:
+          type: string
+          example: P001
+        quantity:
+          type: integer
+          example: 2
+
+    TopSoldProductResponse:
+      type: object
+      properties:
+        productId:
+          type: string
+          example: P001
+        productName:
+          type: string
+          example: Best Item
+        price:
+          type: integer
+          example: 10000
+        quantity:
+          type: integer
+          example: 100
+        totalSold:
+          type: integer
+          example: 50
