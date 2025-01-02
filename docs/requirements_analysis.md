@@ -311,17 +311,8 @@ sequenceDiagram
 ### Request
 
 ```http request
-POST /api/v1/coupons
-Content-Type: application/json
-
-{
-    "userId": "user1"
-}
+POST /api/v1/users/{userId}/coupons/{couponId}
 ```
-
-| 요청 필드명   | 타입     | 설명             | 필수 여부 | 기본값 | 제약 조건 |
-|----------|--------|----------------|-------|-----|-------|
-| `userId` | string | 쿠폰을 발급할 사용자 ID | Y     |     |       |
 
 ### Response
 

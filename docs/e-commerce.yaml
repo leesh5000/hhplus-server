@@ -17,8 +17,6 @@ tags:
     description: 사용자 관련 API
   - name: Products
     description: 상품 관련 API
-  - name: Coupons
-    description: 쿠폰 관련 API
   - name: Orders
     description: 주문/결제 관련 API
 
@@ -130,7 +128,7 @@ paths:
   /api/v1/users/{userId}/coupons:
     get:
       tags:
-        - Coupons
+        - Users
       summary: 유저가 보유한 쿠폰 조회
       description: 특정 사용자(ID)가 보유한 쿠폰 목록을 조회한다.
       operationId: getUserCoupons
@@ -157,10 +155,10 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
-  /api/v1/coupons:
+  /api/v1/users/{userId}/coupons/{couponId}:
     post:
       tags:
-        - Coupons
+        - Users
       summary: 선착순 할인 쿠폰 발급
       description: 사용자 ID를 받아 선착순 할인 쿠폰을 발급한다.
       operationId: issueCoupon
