@@ -6,68 +6,113 @@ DROP DATABASE IF EXISTS `hhplus`;
 CREATE DATABASE `hhplus`;
 USE `hhplus`;
 
--- 1) USERS 테이블
-CREATE TABLE `users` (
-                         `id` BIGINT NOT NULL AUTO_INCREMENT,
-                         `name` VARCHAR(100) NOT NULL,
-                         `balance` BIGINT NOT NULL DEFAULT 0,
-                         PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- USER table
+CREATE TABLE USER (
+                      id BIGINT NOT NULL AUTO_INCREMENT,
+                      name VARCHAR(100) NOT NULL,
+                      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                      last_modified_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                      PRIMARY KEY (id)
+);
 
--- 2) BALANCE_HISTORY 테이블
-CREATE TABLE `balance_history` (
-                                   `id` BIGINT NOT NULL AUTO_INCREMENT,
-                                   `user_id` BIGINT NOT NULL,
-                                   `usage` BIGINT NOT NULL,
-                                   `reason` VARCHAR(255) NOT NULL,
-                                   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- USER_BALANCE table
+CREATE TABLE USER_BALANCE (
+                      id BIGINT NOT NULL AUTO_INCREMENT,
+                      balance BIGINT DEFAULT 0,
+                      user_id BIGINT NOT NULL,
+                      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                      last_modified_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                      PRIMARY KEY (id)
+);
 
--- 3) COUPON_MOLD 테이블
-CREATE TABLE `coupon_mold` (
-                               `id` BIGINT NOT NULL AUTO_INCREMENT,
-                               `discount_amount` BIGINT NOT NULL,
-                               `quantity` INT NOT NULL,
-                               `expiration_date` DATE NOT NULL,
-                               PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- COUPON_MOLD table
+CREATE TABLE COUPON_MOLD (
+                     id BIGINT NOT NULL AUTO_INCREMENT,
+                     name VARCHAR(100) NOT NULL,
+                     discount_amount BIGINT NOT NULL,
+                     expiration_date DATETIME NOT NULL,
+                     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                     last_modified_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                     PRIMARY KEY (id)
+);
 
--- 4) USER_COUPON 테이블
-CREATE TABLE `user_coupon` (
-                               `id` BIGINT NOT NULL AUTO_INCREMENT,
-                               `owner_id` BIGINT NOT NULL,
-                               `coupon_mold_id` BIGINT NOT NULL,
-                               `discount_amount` BIGINT NOT NULL,
-                               `expiration_date` DATE NOT NULL,
-                               PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- COUPON_MOLD_INVENTORY table
+CREATE TABLE COUPON_MOLD_INVENTORY (
+                   id BIGINT NOT NULL AUTO_INCREMENT,
+                   stock INT NOT NULL,
+                   coupon_mold_id BIGINT NOT NULL,
+                   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                   last_modified_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                   PRIMARY KEY (id)
+);
 
--- 5) PRODUCT 테이블
-CREATE TABLE `product` (
-                           `id` BIGINT NOT NULL AUTO_INCREMENT,
-                           `name` VARCHAR(100) NOT NULL,
-                           `price` BIGINT NOT NULL,
-                           `stock_quantity` INT NOT NULL,
-                           PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- USER_COUPON table
+CREATE TABLE USER_COUPON (
+                     id BIGINT NOT NULL AUTO_INCREMENT,
+                     used BOOLEAN DEFAULT FALSE,
+                     used_at DATETIME,
+                     user_id BIGINT NOT NULL,
+                     coupon_mold_id BIGINT NOT NULL,
+                     payment_id BIGINT,
+                     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                     last_modified_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                     PRIMARY KEY (id)
+);
 
--- 6) ORDERS 테이블
--- 여기서는 state 를 ENUM 예시로 사용
-CREATE TABLE `orders` (
-                          `id` BIGINT NOT NULL AUTO_INCREMENT,
-                          `total_price` BIGINT NOT NULL,
-                          `state` ENUM('PAYMENT_WAITING', 'DELIVERY_COMPLETED', 'CANCELED') NOT NULL DEFAULT 'PAYMENT_WAITING',
-                          `orderer_id` BIGINT NOT NULL,
-                          `orderer_name` VARCHAR(100) NOT NULL,
-                          PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- PRODUCT table
+CREATE TABLE PRODUCT (
+                     id BIGINT NOT NULL AUTO_INCREMENT,
+                     name VARCHAR(100) NOT NULL,
+                     price BIGINT NOT NULL,
+                     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                     last_modified_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                     PRIMARY KEY (id)
+);
 
--- 7) ORDER_ITEM 테이블
-CREATE TABLE `order_item` (
-                              `id` BIGINT NOT NULL AUTO_INCREMENT,
-                              `order_id` BIGINT NOT NULL,
-                              `product_id` BIGINT NOT NULL,
-                              `price` BIGINT NOT NULL,
-                              `quantity` INT NOT NULL,
-                              PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- PRODUCT_INVENTORY table
+CREATE TABLE PRODUCT_INVENTORY (
+                   id BIGINT NOT NULL AUTO_INCREMENT,
+                   stock INT NOT NULL,
+                   product_id BIGINT NOT NULL,
+                   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                   last_modified_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                   PRIMARY KEY (id)
+);
+
+-- ORDERS table
+CREATE TABLE ORDERS (
+                    id BIGINT NOT NULL AUTO_INCREMENT,
+                    total_price BIGINT NOT NULL,
+                    state ENUM('PAYMENT_WAITING', 'DELIVERY_COMPLETED', 'CANCELED') NOT NULL,
+                    user_id BIGINT NOT NULL,
+                    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    last_modified_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    PRIMARY KEY (id)
+);
+
+-- ORDER_PRODUCT table
+CREATE TABLE ORDER_PRODUCT (
+                    id BIGINT NOT NULL AUTO_INCREMENT,
+                    order_id BIGINT NOT NULL,
+                    product_id BIGINT NOT NULL,
+                    price BIGINT NOT NULL,
+                    quantity INT NOT NULL,
+                    discount_amount BIGINT NOT NULL,
+                    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    last_modified_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    PRIMARY KEY (id)
+);
+
+-- PAYMENT table
+CREATE TABLE PAYMENT (
+                     id BIGINT NOT NULL AUTO_INCREMENT,
+                     order_id BIGINT NOT NULL,
+                     user_coupon_id BIGINT,
+                     amount BIGINT NOT NULL,
+                     discount_amount BIGINT NOT NULL,
+                     status ENUM('PENDING', 'COMPLETED', 'FAILED') NOT NULL,
+                     paid_at DATETIME,
+                     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                     last_modified_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                     PRIMARY KEY (id)
+);

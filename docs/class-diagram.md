@@ -6,12 +6,12 @@ classDiagram
         -name: String
         -coupons: List~UserCoupon~
         -balance: Money
-        +charge(Money): BalanceHistory
+        +charge(Money): UserBalance
     }
     
     User "1" --> "many" UserCoupon
     
-    class BalanceHistory {
+    class UserBalance {
         -id: Long
         -user: User
         -usage: Money
@@ -37,10 +37,10 @@ classDiagram
 
     UserCoupon "1" --> "1" CouponMold
     
-    BalanceHistory "1" --> "1" User
+    UserBalance "1" --> "1" User
     
     class Order {
-        -orderItems: List~OrderItem~
+        -orderItems: List~OrderProduct~
         -totalPrice: Money
         -state: OrderState
         -orderer: Orderer
@@ -54,10 +54,11 @@ classDiagram
         -name: String
     }
 
-    class OrderItem {
+    class OrderProduct {
         -product: Product
         -price: int
         -quantity: int
+        -discountAmount: Money
         +calculatePrice(): Money
     }
 
@@ -77,9 +78,23 @@ classDiagram
         +isAvailable(int): boolean
     }
     
-    OrderItem "many" --> "1" Product
+    class Payment {
+        -id: Long
+        -order: Order
+        -userCoupons: List~UserCoupon~
+        -amount: Money
+        -paymentMethod: PaymentMethod
+        -paymentState: PaymentState
+        +complete()
+        +cancel()
+    }
+    
+    Payment "1" --> "1" Order
+    Payment "1" --> "many" UserCoupon
+    
+    OrderProduct "many" --> "1" Product
 
     Order "1" --> "1" Orderer
-    Order "1" --* "many" OrderItem
+    Order "1" --* "many" OrderProduct
     Order "1" --> "1" OrderState
 ```
