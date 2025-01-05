@@ -9,7 +9,7 @@ USE `hhplus`;
 -- USER table
 CREATE TABLE USER (
                       id BIGINT NOT NULL AUTO_INCREMENT,
-                      name VARCHAR(100) NOT NULL,
+                      name VARCHAR(100) NOT NULL COMMENT '사용자 이름',
                       created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                       last_modified_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                       PRIMARY KEY (id)
@@ -18,8 +18,8 @@ CREATE TABLE USER (
 -- USER_BALANCE table
 CREATE TABLE USER_BALANCE (
                       id BIGINT NOT NULL AUTO_INCREMENT,
-                      balance BIGINT DEFAULT 0,
-                      user_id BIGINT NOT NULL,
+                      balance BIGINT DEFAULT 0 COMMENT '사용자 잔액',
+                      user_id BIGINT NOT NULL COMMENT '사용자 ID',
                       created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                       last_modified_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                       PRIMARY KEY (id)
@@ -28,9 +28,9 @@ CREATE TABLE USER_BALANCE (
 -- COUPON_MOLD table
 CREATE TABLE COUPON_MOLD (
                      id BIGINT NOT NULL AUTO_INCREMENT,
-                     name VARCHAR(100) NOT NULL,
-                     discount_amount BIGINT NOT NULL,
-                     expiration_date DATETIME NOT NULL,
+                     name VARCHAR(100) NOT NULL COMMENT '쿠폰 이름',
+                     discount_amount BIGINT NOT NULL COMMENT '할인 금액',
+                     expiration_date DATETIME NOT NULL COMMENT '만료일',
                      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                      last_modified_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                      PRIMARY KEY (id)
@@ -39,7 +39,7 @@ CREATE TABLE COUPON_MOLD (
 -- COUPON_MOLD_INVENTORY table
 CREATE TABLE COUPON_MOLD_INVENTORY (
                    id BIGINT NOT NULL AUTO_INCREMENT,
-                   stock INT NOT NULL,
+                   stock INT NOT NULL COMMENT '재고',
                    coupon_mold_id BIGINT NOT NULL,
                    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                    last_modified_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -49,8 +49,8 @@ CREATE TABLE COUPON_MOLD_INVENTORY (
 -- USER_COUPON table
 CREATE TABLE USER_COUPON (
                      id BIGINT NOT NULL AUTO_INCREMENT,
-                     used BOOLEAN DEFAULT FALSE,
-                     used_at DATETIME,
+                     used BOOLEAN DEFAULT FALSE COMMENT '사용 여부',
+                     used_at DATETIME COMMENT '사용 일시',
                      user_id BIGINT NOT NULL,
                      coupon_mold_id BIGINT NOT NULL,
                      payment_id BIGINT,
@@ -62,8 +62,8 @@ CREATE TABLE USER_COUPON (
 -- PRODUCT table
 CREATE TABLE PRODUCT (
                      id BIGINT NOT NULL AUTO_INCREMENT,
-                     name VARCHAR(100) NOT NULL,
-                     price BIGINT NOT NULL,
+                     name VARCHAR(100) NOT NULL COMMENT '상품 이름',
+                     price BIGINT NOT NULL COMMENT '상품 가격',
                      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                      last_modified_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                      PRIMARY KEY (id)
@@ -72,18 +72,18 @@ CREATE TABLE PRODUCT (
 -- PRODUCT_INVENTORY table
 CREATE TABLE PRODUCT_INVENTORY (
                    id BIGINT NOT NULL AUTO_INCREMENT,
-                   stock INT NOT NULL,
+                   stock INT NOT NULL COMMENT '재고',
                    product_id BIGINT NOT NULL,
                    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                    last_modified_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                    PRIMARY KEY (id)
 );
 
--- ORDERS table
+-- ORDER table
 CREATE TABLE ORDERS (
                     id BIGINT NOT NULL AUTO_INCREMENT,
-                    total_price BIGINT NOT NULL,
-                    state ENUM('PAYMENT_WAITING', 'DELIVERY_COMPLETED', 'CANCELED') NOT NULL,
+                    total_price BIGINT NOT NULL COMMENT '총 가격',
+                    state ENUM('PAYMENT_WAITING', 'DELIVERY_COMPLETED', 'CANCELED') NOT NULL COMMENT '주문 상태',
                     user_id BIGINT NOT NULL,
                     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     last_modified_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -95,9 +95,9 @@ CREATE TABLE ORDER_PRODUCT (
                     id BIGINT NOT NULL AUTO_INCREMENT,
                     order_id BIGINT NOT NULL,
                     product_id BIGINT NOT NULL,
-                    price BIGINT NOT NULL,
-                    quantity INT NOT NULL,
-                    discount_amount BIGINT NOT NULL,
+                    price BIGINT NOT NULL COMMENT '주문 상품 가격',
+                    quantity INT NOT NULL COMMENT '주문 상품 수량',
+                    discount_amount BIGINT NOT NULL COMMENT '할인 금액',
                     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     last_modified_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                     PRIMARY KEY (id)
@@ -108,10 +108,10 @@ CREATE TABLE PAYMENT (
                      id BIGINT NOT NULL AUTO_INCREMENT,
                      order_id BIGINT NOT NULL,
                      user_coupon_id BIGINT,
-                     amount BIGINT NOT NULL,
-                     discount_amount BIGINT NOT NULL,
-                     status ENUM('PENDING', 'COMPLETED', 'FAILED') NOT NULL,
-                     paid_at DATETIME,
+                     amount BIGINT NOT NULL COMMENT '결제 금액',
+                     discount_amount BIGINT NOT NULL COMMENT '할인 금액',
+                     status ENUM('PENDING', 'COMPLETED', 'FAILED') NOT NULL COMMENT '결제 상태',
+                     paid_at DATETIME COMMENT '결제 일시',
                      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                      last_modified_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                      PRIMARY KEY (id)
