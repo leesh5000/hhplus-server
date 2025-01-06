@@ -18,14 +18,14 @@
 
 # 실행 방법
 
-## 1. Docker-Compose로 서버 실행을 위한 환경 실행
+1. Docker-Compose로 서버 실행을 위한 환경 실행
 
 프로젝트 루트에서 다음 명령어를 실행합니다.
 ```bash
 docker compose -f ./infra/docker-compose-db.yml up -d
 ```
 
-## 2. (IntelliJ IDEA) 애플리케이션 실행
+2. (IntelliJ IDEA) 애플리케이션 실행
 
 IntelliJ IDEA에서 `ServerApplication` 클래스를 실행합니다.
 
