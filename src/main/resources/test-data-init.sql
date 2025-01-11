@@ -1,6 +1,3 @@
--- 새로운 어드민 계정 생성
-GRANT ALL PRIVILEGES ON *.* TO 'hhplus'@'%' WITH GRANT OPTION;
-
 -- 새로운 데이터베이스 생성
 DROP DATABASE IF EXISTS `hhplus`;
 CREATE DATABASE `hhplus`;
@@ -15,8 +12,8 @@ CREATE TABLE USER (
                       PRIMARY KEY (id)
 );
 
--- USER_BALANCE table
-CREATE TABLE USER_BALANCE (
+-- WALLET table
+CREATE TABLE WALLET (
                       id BIGINT NOT NULL AUTO_INCREMENT,
                       balance BIGINT DEFAULT 0 COMMENT '사용자 잔액',
                       user_id BIGINT NOT NULL COMMENT '사용자 ID',
@@ -25,34 +22,44 @@ CREATE TABLE USER_BALANCE (
                       PRIMARY KEY (id)
 );
 
--- COUPON_MOLD table
-CREATE TABLE COUPON_MOLD (
+-- WALLET_HISTORY table
+CREATE TABLE WALLET_HISTORY (
+                      id BIGINT NOT NULL AUTO_INCREMENT,
+                      amount BIGINT NOT NULL COMMENT '금액',
+                      wallet_id BIGINT NOT NULL COMMENT '지갑 ID',
+                      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                      last_modified_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                      PRIMARY KEY (id)
+);
+
+-- COUPON table
+CREATE TABLE COUPON (
                      id BIGINT NOT NULL AUTO_INCREMENT,
                      name VARCHAR(100) NOT NULL COMMENT '쿠폰 이름',
                      discount_amount BIGINT NOT NULL COMMENT '할인 금액',
-                     expiration_date DATETIME NOT NULL COMMENT '만료일',
+                     expired_at DATETIME NOT NULL COMMENT '만료일',
                      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                      last_modified_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                      PRIMARY KEY (id)
 );
 
--- COUPON_MOLD_INVENTORY table
-CREATE TABLE COUPON_MOLD_INVENTORY (
+-- COUPON_INVENTORY table
+CREATE TABLE COUPON_INVENTORY (
                    id BIGINT NOT NULL AUTO_INCREMENT,
                    stock INT NOT NULL COMMENT '재고',
-                   coupon_mold_id BIGINT NOT NULL,
+                   coupon_id BIGINT NOT NULL,
                    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                    last_modified_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                    PRIMARY KEY (id)
 );
 
--- USER_COUPON table
-CREATE TABLE USER_COUPON (
+-- ISSUED_COUPON table
+CREATE TABLE ISSUED_COUPON (
                      id BIGINT NOT NULL AUTO_INCREMENT,
                      used BOOLEAN DEFAULT FALSE COMMENT '사용 여부',
                      used_at DATETIME COMMENT '사용 일시',
                      user_id BIGINT NOT NULL,
-                     coupon_mold_id BIGINT NOT NULL,
+                     coupon_id BIGINT NOT NULL,
                      payment_id BIGINT,
                      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                      last_modified_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -69,6 +76,10 @@ CREATE TABLE PRODUCT (
                      PRIMARY KEY (id)
 );
 
+INSERT INTO PRODUCT (name, price) VALUES ('product1', 10000);
+INSERT INTO PRODUCT (name, price) VALUES ('product2', 20000);
+INSERT INTO PRODUCT (name, price) VALUES ('product3', 30000);
+
 -- PRODUCT_INVENTORY table
 CREATE TABLE PRODUCT_INVENTORY (
                    id BIGINT NOT NULL AUTO_INCREMENT,
@@ -82,14 +93,12 @@ CREATE TABLE PRODUCT_INVENTORY (
 -- ORDER table
 CREATE TABLE ORDERS (
                     id BIGINT NOT NULL AUTO_INCREMENT,
-                    total_price BIGINT NOT NULL COMMENT '총 가격',
-                    state ENUM('PAYMENT_WAITING', 'DELIVERY_COMPLETED', 'CANCELED') NOT NULL COMMENT '주문 상태',
+                    order_price BIGINT NOT NULL COMMENT '주문 가격',
                     user_id BIGINT NOT NULL,
                     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     last_modified_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                     PRIMARY KEY (id)
 );
-
 -- ORDER_PRODUCT table
 CREATE TABLE ORDER_PRODUCT (
                     id BIGINT NOT NULL AUTO_INCREMENT,
@@ -97,7 +106,6 @@ CREATE TABLE ORDER_PRODUCT (
                     product_id BIGINT NOT NULL,
                     price BIGINT NOT NULL COMMENT '주문 상품 가격',
                     quantity INT NOT NULL COMMENT '주문 상품 수량',
-                    discount_amount BIGINT NOT NULL COMMENT '할인 금액',
                     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     last_modified_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                     PRIMARY KEY (id)
@@ -107,10 +115,9 @@ CREATE TABLE ORDER_PRODUCT (
 CREATE TABLE PAYMENT (
                      id BIGINT NOT NULL AUTO_INCREMENT,
                      order_id BIGINT NOT NULL,
-                     user_coupon_id BIGINT,
+                     issued_coupon_id BIGINT,
                      amount BIGINT NOT NULL COMMENT '결제 금액',
                      discount_amount BIGINT NOT NULL COMMENT '할인 금액',
-                     status ENUM('PENDING', 'COMPLETED', 'FAILED') NOT NULL COMMENT '결제 상태',
                      paid_at DATETIME COMMENT '결제 일시',
                      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                      last_modified_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

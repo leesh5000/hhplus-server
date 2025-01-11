@@ -43,3 +43,7 @@ IntelliJ IDEA에서 `ServerApplication` 클래스를 실행합니다.
 
 - [Discussions](https://github.com/leesh5000/hhplus-server/discussions)
 - [Issues](https://github.com/leesh5000/hhplus-server/issues)
+
+# 참고 자료
+
+- [TestContainers](https://testcontainers.com/)
