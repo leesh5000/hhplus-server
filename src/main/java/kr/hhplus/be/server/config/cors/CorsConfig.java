@@ -15,7 +15,7 @@ public class CorsConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         // TODO 서버 환경 프로파일에 따라 넣도록 수정
-                        .allowedOrigins("*")  // Swagger UI 도메인
+                        .allowedOriginPatterns("*")  // Swagger UI 도메인
                         .allowedMethods("GET", "POST", "PUT", "DELETE")
                         .allowedHeaders("*")
                         .allowCredentials(true);
