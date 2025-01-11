@@ -16,10 +16,6 @@ class TestcontainersConfiguration {
 			.withUsername("hhplus")
 			.withPassword("hhplus");
 
-		// SQL 파일을 컨테이너에 복사
-		MYSQL_CONTAINER
-				.withInitScript("test-data-init.sql");
-
 		MYSQL_CONTAINER.start();
 
 		System.setProperty("spring.datasource.url", MYSQL_CONTAINER.getJdbcUrl() + "?characterEncoding=UTF-8&serverTimezone=UTC");
