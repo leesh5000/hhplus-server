@@ -19,7 +19,7 @@ public class UserFixture {
     }
 
     public static User create(Long id, Point maximumBalance) {
-        return new User(id, "유저", maximumBalance.amount());
+        return new User(id, "유저", maximumBalance.toLong());
     }
 
     public static User create(Long id, Wallet userWallet) {

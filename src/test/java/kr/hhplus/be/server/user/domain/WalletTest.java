@@ -19,7 +19,7 @@ class WalletTest {
         WalletHistory walletHistory = wallet.deposit(amount);
 
         // then
-        Long actualWalletBalance = wallet.getBalance().amount();
+        Long actualWalletBalance = wallet.getBalance().toLong();
         int actualWalletHistoryAmount = walletHistory.getAmount();
         Assertions.assertThat(actualWalletBalance).isEqualTo(amount);
         Assertions.assertThat(actualWalletHistoryAmount).isEqualTo(amount);
@@ -35,7 +35,7 @@ class WalletTest {
         Point balance = wallet.getBalance();
 
         // then
-        Assertions.assertThat(balance.amount()).isEqualTo(0);
+        Assertions.assertThat(balance.toLong()).isEqualTo(0);
     }
 
     @DisplayName("포인트를 입력하여, 지갑에서 잔고를 인출하면, 입력한 값 만큼 잔고가 차감되고 지갑 내역은 입력한 포인트를 음수로 가져야한다.")
@@ -50,7 +50,7 @@ class WalletTest {
         WalletHistory walletHistory = wallet.withdraw(amount);
 
         // then
-        Long actualWalletBalance = wallet.getBalance().amount();
+        Long actualWalletBalance = wallet.getBalance().toLong();
         int actualWalletHistoryAmount = walletHistory.getAmount();
         Assertions.assertThat(actualWalletBalance).isEqualTo(0);
         Assertions.assertThat(actualWalletHistoryAmount).isEqualTo(-amount);

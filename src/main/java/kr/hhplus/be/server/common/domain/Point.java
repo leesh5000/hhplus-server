@@ -30,8 +30,7 @@ public class Point {
         this(0L);
     }
 
-    @Column(insertable = false, updatable = false)
-    public Long amount() {
+    public Long toLong() {
         return amount;
     }
 

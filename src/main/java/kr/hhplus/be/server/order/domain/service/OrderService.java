@@ -4,9 +4,10 @@ import jakarta.transaction.Transactional;
 import kr.hhplus.be.server.order.domain.Order;
 import kr.hhplus.be.server.order.domain.OrderProduct;
 import kr.hhplus.be.server.order.domain.repository.OrderRepository;
-import kr.hhplus.be.server.order.domain.service.dto.request.OrderCommand;
+import kr.hhplus.be.server.order.domain.service.dto.request.PlaceOrderCommand;
 import kr.hhplus.be.server.product.domain.Product;
 import kr.hhplus.be.server.product.domain.repository.ProductRepository;
+import kr.hhplus.be.server.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,11 +22,19 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
 
-    public Order placeOrder(OrderCommand command) {
+    public Order placeOrder(PlaceOrderCommand command) {
+
+        List<OrderProduct> orderProducts = generateOrderProducts(command);
+        User orderer = command.orderer();
+        Order order = new Order(orderer, orderProducts);
+        return orderRepository.save(order);
+    }
+
+    private List<OrderProduct> generateOrderProducts(PlaceOrderCommand command) {
 
         List<OrderProduct> orderProducts = new ArrayList<>();
 
-        command.products().forEach(orderProductCommand -> {
+        command.orderProducts().forEach(orderProductCommand -> {
             Long productId = orderProductCommand.productId();
             Integer orderQuantity = orderProductCommand.quantity();
 
@@ -35,9 +44,6 @@ public class OrderService {
             OrderProduct orderProduct = new OrderProduct(orderQuantity, product);
             orderProducts.add(orderProduct);
         });
-
-        Long userId = command.userId();
-        Order order = new Order(userId, orderProducts);
-        return orderRepository.save(order);
+        return orderProducts;
     }
 }

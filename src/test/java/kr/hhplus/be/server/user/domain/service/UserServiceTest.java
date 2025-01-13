@@ -9,7 +9,7 @@ import kr.hhplus.be.server.mock.domain.WalletFixture;
 import kr.hhplus.be.server.user.domain.User;
 import kr.hhplus.be.server.user.domain.Wallet;
 import kr.hhplus.be.server.user.domain.WalletHistory;
-import kr.hhplus.be.server.user.domain.service.dto.request.UserPointCommand;
+import kr.hhplus.be.server.user.domain.service.dto.request.UsePointCommand;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,7 +39,7 @@ class UserServiceTest {
 
         // when : 유저 1000 포인트를 충전하면
         int amount = 1000;
-        UserPointCommand cmd = new UserPointCommand(userId, amount);
+        UsePointCommand cmd = new UsePointCommand(userId, amount);
         sut.chargePoint(cmd);
 
         // then 1 : 사용자의 포인트가 1000 만큼 증가하고,
@@ -73,7 +73,7 @@ class UserServiceTest {
         Long userId = userFixture.getId();
 
         // when & then : 유저가 1000 포인트를 충전하면, `BusinessException`이 발생하고 에러 코드가 `MAXIMUM_BALANCE_EXCEEDED`여야 한다.
-        UserPointCommand cmd = new UserPointCommand(userId, 1000);
+        UsePointCommand cmd = new UsePointCommand(userId, 1000);
         Assertions.assertThatThrownBy(
                         () -> sut.chargePoint(cmd)
                 )

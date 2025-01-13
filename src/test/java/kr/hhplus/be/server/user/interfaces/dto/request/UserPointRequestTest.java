@@ -24,7 +24,7 @@ class UserPointRequestTest {
 
     @Test
     @DisplayName("0보다 작은 값을 요청한 경우, `INVALID_AMOUNT_REQUEST` 에러 코드를 가진 `BusinessException`이 발생해야한다.")
-    void chargeUserBalanceRequest_InvalidAmount() {
+    void chargeUserBalanceRequest_InvalidToLong() {
         // Given
         Integer amount = -1000;
 
@@ -35,7 +35,7 @@ class UserPointRequestTest {
 
     @Test
     @DisplayName("2100000000보다 큰 값을 요청한 경우, `INVALID_AMOUNT_REQUEST` 에러 코드를 가진 `BusinessException`이 발생해야한다.")
-    void chargeUserBalanceRequest_InvalidAmount2() {
+    void chargeUserBalanceRequest_InvalidToLong2() {
         // Given
         Integer amount = 2100000001;
 

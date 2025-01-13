@@ -6,6 +6,7 @@ import kr.hhplus.be.server.common.domain.BusinessException;
 import kr.hhplus.be.server.common.domain.ErrorCode;
 import kr.hhplus.be.server.common.domain.Point;
 import kr.hhplus.be.server.common.domain.service.ClockHolder;
+import kr.hhplus.be.server.user.domain.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -70,11 +71,28 @@ public class IssuedCoupon extends BaseEntity {
         return getCreatedAt();
     }
 
-    public void use(ClockHolder clockHolder, Long paymentId) {
+    public void use(User user, ClockHolder clockHolder, Long paymentId) {
+        verifyCouponOwner(user);
+        LocalDateTime now = clockHolder.now();
+        verifyCouponNotExpire(now);
         verifyCouponNotUsed();
         this.used = Boolean.TRUE;
-        this.usedAt = clockHolder.now();
+        this.usedAt = now;
         this.paymentId = paymentId;
+    }
+
+    private void verifyCouponNotExpire(LocalDateTime now) {
+        if (coupon.isExpire(now)) {
+            throw new BusinessException(
+                    ErrorCode.EXPIRED_COUPON,
+                    "쿠폰이 만료되었습니다.");
+        }
+    }
+
+    private void verifyCouponOwner(User user) {
+        if (user.getId().equals(userId)) {
+            throw new RuntimeException("잘못된 요청입니다.");
+        }
     }
 
     private void verifyCouponNotUsed() {

@@ -45,7 +45,7 @@ public class Wallet extends BaseEntity {
         if (balance.add(point).isGreaterThan(MAXIMUM_BALANCE)) {
             throw new BusinessException(
                     ErrorCode.MAXIMUM_BALANCE_EXCEED,
-                    "ID가 %d인 유저 지갑이 최대 한도 %d를 초과했습니다.".formatted(id, MAXIMUM_BALANCE.amount())
+                    "ID가 %d인 유저 지갑이 최대 한도 %d를 초과했습니다.".formatted(id, MAXIMUM_BALANCE.toLong())
             );
         }
     }

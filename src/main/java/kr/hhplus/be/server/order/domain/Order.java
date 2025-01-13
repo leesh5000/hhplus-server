@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import kr.hhplus.be.server.common.domain.BaseEntity;
 import kr.hhplus.be.server.common.domain.Point;
 import kr.hhplus.be.server.product.domain.Product;
+import kr.hhplus.be.server.user.domain.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -26,8 +27,8 @@ public class Order extends BaseEntity {
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<OrderProduct> orderProducts = new ArrayList<>();
 
-    public Order(Long userId, List<OrderProduct> orderProducts) {
-        this.userId = userId;
+    public Order(User orderer, List<OrderProduct> orderProducts) {
+        this.userId = orderer.getId();
         this.orderProducts.addAll(orderProducts);
         this.orderPrice = calculateOrderPrice();
     }

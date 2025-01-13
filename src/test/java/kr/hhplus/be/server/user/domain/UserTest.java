@@ -21,7 +21,7 @@ class UserTest {
 
         // then
         Point actualUserPoint = user.getPoint();
-        Assertions.assertThat(actualUserPoint.amount()).isEqualTo(amount);
+        Assertions.assertThat(actualUserPoint.toLong()).isEqualTo(amount);
         Integer walletHistoryAmount = walletHistory.getAmount();
         Assertions.assertThat(walletHistoryAmount).isEqualTo(amount);
     }
@@ -36,6 +36,6 @@ class UserTest {
         Point point = user.getPoint();
 
         // then
-        Assertions.assertThat(point.amount()).isEqualTo(1000);
+        Assertions.assertThat(point.toLong()).isEqualTo(1000);
     }
 }

@@ -13,4 +13,5 @@ public interface CouponRepository {
     Optional<IssuedCoupon> findIssuedCouponById(Long issuedCouponId);
     Coupon getById(Long couponId);
     void saveIssuedCoupon(IssuedCoupon issuedCoupon);
+    List<IssuedCoupon> findAllByIssuedCouponIds(List<Long> issuedCouponIds);
 }

@@ -5,6 +5,7 @@ import kr.hhplus.be.server.common.domain.BaseEntity;
 import kr.hhplus.be.server.common.domain.BusinessException;
 import kr.hhplus.be.server.common.domain.ErrorCode;
 import kr.hhplus.be.server.common.domain.Point;
+import kr.hhplus.be.server.user.domain.User;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -56,17 +57,22 @@ public class Coupon extends BaseEntity {
         return Objects.hashCode(id);
     }
 
-    public IssuedCoupon issue(Long userId) {
-        verifyCouponNotExpired();
+    public IssuedCoupon issue(User user, LocalDateTime issueDate) {
+        verifyCouponNotExpired(issueDate);
         this.inventory.decreaseStock();
-        return new IssuedCoupon(userId, this);
+        return new IssuedCoupon(
+                user.getId(),
+                this);
     }
 
-    private void verifyCouponNotExpired() {
-        LocalDateTime now = LocalDateTime.now();
-        if (expiredAt.isBefore(now)) {
+    private void verifyCouponNotExpired(LocalDateTime issueDate) {
+        if (isExpire(issueDate)) {
             throw new BusinessException(ErrorCode.EXPIRED_COUPON, "쿠폰이 만료되었습니다.");
         }
+    }
+
+    public boolean isExpire(LocalDateTime now) {
+        return expiredAt.isBefore(now);
     }
 
     public boolean isSaved() {

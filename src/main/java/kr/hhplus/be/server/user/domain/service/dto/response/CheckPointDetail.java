@@ -6,7 +6,7 @@ public record CheckPointDetail(Long userId, Long point) {
     public static CheckPointDetail from(User user) {
         return new CheckPointDetail(
                 user.getId(),
-                user.getPoint().amount()
+                user.getPoint().toLong()
         );
     }
 }

@@ -28,7 +28,7 @@ public class WalletHistory extends BaseEntity {
     public WalletHistory(Wallet wallet, TransactionType transactionType, Point point) {
         this(wallet,
                 transactionType,
-                point.amount()
+                point.toLong()
                         .intValue()
         );
     }
