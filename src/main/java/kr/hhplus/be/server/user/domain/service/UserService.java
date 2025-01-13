@@ -5,7 +5,7 @@ import kr.hhplus.be.server.user.domain.User;
 import kr.hhplus.be.server.user.domain.Wallet;
 import kr.hhplus.be.server.user.domain.WalletHistory;
 import kr.hhplus.be.server.user.domain.repository.UserRepository;
-import kr.hhplus.be.server.user.domain.service.dto.request.UserPointCommand;
+import kr.hhplus.be.server.user.domain.service.dto.request.UsePointCommand;
 import kr.hhplus.be.server.user.domain.service.dto.response.CheckPointDetail;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,24 +19,17 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public void chargePoint(UserPointCommand command) {
-        User user = userRepository.getById(
-                command.userId()
-        );
-        WalletHistory walletHistory = user.chargePoint(
-                command.amount()
-        );
+    public void chargePoint(UsePointCommand command) {
+        User user = command.user();
+        Integer amount = command.amount();
+        WalletHistory walletHistory = user.chargePoint(amount);
         userRepository.save(walletHistory);
     }
 
-    public void usePoint(UserPointCommand command) {
-        User user = userRepository.getById(
-                command.userId()
-        );
-
-        WalletHistory walletHistory = user.deductPoint(
-                command.amount()
-        );
+    public void usePoint(UsePointCommand command) {
+        User user = command.user();
+        Integer amount = command.amount();
+        WalletHistory walletHistory = user.deductPoint(amount);
         userRepository.save(walletHistory);
     }
 

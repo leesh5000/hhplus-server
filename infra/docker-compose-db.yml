@@ -1,14 +1,14 @@
 services:
-  mariadb:
+  mysql:
     image: mysql:8.0
-    container_name: mariadb
+    container_name: mysql
     ports:
       - "3306:3306" # 호스트 포트:컨테이너 포트
     environment:
       MYSQL_ROOT_PASSWORD: 'hhplus'   # Root 사용자 비밀번호
       MYSQL_USER: hhplus              # 생성할 사용자 이름
-      MYSQL_PASSWORD: 'hhplus'        # 생성할 사용자 비밀번호
+      MYSQL_PASSWORD: hhplus          # 생성할 사용자 비밀번호
+      MYSQL_DATABASE: hhplus          # 생성할 데이터베이스 이름
     volumes:
       - ./data:/var/lib/mysql   # 데이터 저장소
-      - ./init:/docker-entrypoint-initdb.d
     restart: always                   # 컨테이너 재시작 정책

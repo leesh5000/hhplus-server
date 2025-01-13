@@ -50,8 +50,8 @@ class ListCouponsControllerTest {
         for (int i = 0; i < responses.getBody().size(); i++) {
             assertThat(responses.getBody().get(i).couponId()).isEqualTo(issuedCoupons.get(i).getCouponId().toString());
             assertThat(responses.getBody().get(i).couponName()).isEqualTo(issuedCoupons.get(i).getCouponName());
-            assertThat(responses.getBody().get(i).discountAmount()).isEqualTo(issuedCoupons.get(i).getDiscountAmount().amount());
-            assertThat(responses.getBody().get(i).discountAmount()).isEqualTo(issuedCoupons.get(i).getDiscountAmount().amount());
+            assertThat(responses.getBody().get(i).discountAmount()).isEqualTo(issuedCoupons.get(i).getDiscountAmount().toLong());
+            assertThat(responses.getBody().get(i).discountAmount()).isEqualTo(issuedCoupons.get(i).getDiscountAmount().toLong());
             assertThat(responses.getBody().get(i).expiredAt()).isEqualTo(issuedCoupons.get(i).getExpiredAt());
         }
     }

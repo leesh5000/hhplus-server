@@ -17,7 +17,7 @@ public record UserCouponsDetail(
         return new UserCouponsDetail(
                 issuedCoupon.getCouponId(),
                 issuedCoupon.getCouponName(),
-                issuedCoupon.getDiscountAmount().amount(),
+                issuedCoupon.getDiscountAmount().toLong(),
                 issuedCoupon.isUsed(),
                 issuedCoupon.getUsedAt(),
                 issuedCoupon.getExpiredAt(),

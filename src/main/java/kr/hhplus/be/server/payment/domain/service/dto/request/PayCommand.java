@@ -1,12 +1,13 @@
 package kr.hhplus.be.server.payment.domain.service.dto.request;
 
-import java.util.List;
+import kr.hhplus.be.server.common.domain.Point;
+import kr.hhplus.be.server.order.domain.Order;
 
-public class PayCommand {
-        Long orderId;
-        List<Long> applyCouponIds;
-        Long amount;
-        Integer discountAmount;
+public record PayCommand(
+        Order order,
+        Point usePoint,
+        Point discountPoint
+) {
 
 
 }

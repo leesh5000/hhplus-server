@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.hhplus.be.server.user.domain.service.UserService;
-import kr.hhplus.be.server.user.domain.service.dto.request.UserPointCommand;
+import kr.hhplus.be.server.user.domain.service.dto.request.UsePointCommand;
 import kr.hhplus.be.server.user.interfaces.dto.request.UserPointRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -64,7 +64,7 @@ public class ChargePointController {
             @RequestBody UserPointRequest request
     ) {
 
-        UserPointCommand command = request.toCommand(userId);
+        UsePointCommand command = request.toCommand(userId);
         userService.chargePoint(
                 command
         );

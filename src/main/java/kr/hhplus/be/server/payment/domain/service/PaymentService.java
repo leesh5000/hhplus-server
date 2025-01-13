@@ -1,11 +1,11 @@
 package kr.hhplus.be.server.payment.domain.service;
 
 import jakarta.transaction.Transactional;
-import kr.hhplus.be.server.common.domain.Point;
 import kr.hhplus.be.server.common.domain.service.ClockHolder;
 import kr.hhplus.be.server.payment.domain.Payment;
 import kr.hhplus.be.server.payment.domain.external.DataPlatform;
 import kr.hhplus.be.server.payment.domain.repository.PaymentRepository;
+import kr.hhplus.be.server.payment.domain.service.dto.request.PayCommand;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,19 +18,24 @@ public class PaymentService {
     private final ClockHolder clockHolder;
     private final DataPlatform dataPlatform;
 
-    public Payment pay(Long orderId, Point usePoint, Point totalDiscountPoint) {
+    public Payment pay(PayCommand command) {
+
+        Long orderId = command.order()
+                .getId();
+
         Payment payment = new Payment(
-                usePoint,
-                totalDiscountPoint,
+                command.usePoint(),
+                command.discountPoint(),
                 orderId,
                 clockHolder
         );
         Payment saved = paymentRepository.save(payment);
 
+        // 외부 Data Platform 전송
         dataPlatform.sendPaymentData(
                 payment.getOrderId(),
-                payment.getAmount().amount(),
-                payment.getDiscountAmount().amount(),
+                payment.getAmount().toLong(),
+                payment.getDiscountAmount().toLong(),
                 payment.getPaidAt()
         );
 

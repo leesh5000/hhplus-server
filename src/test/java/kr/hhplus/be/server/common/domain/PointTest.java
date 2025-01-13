@@ -13,14 +13,14 @@ class PointTest {
     @Test
     void create() {
         Point point = new Point(1L);
-        assertEquals(1L, point.amount());
+        assertEquals(1L, point.toLong());
     }
 
     @DisplayName("Integer 값을 입력받아 객체 생성 가능해야 한다.")
     @Test
     void createFromInteger() {
         Point point = new Point(1);
-        assertEquals(1L, point.amount());
+        assertEquals(1L, point.toLong());
     }
 
     @DisplayName("금액을 더하면, 두 금액의 합을 반환한다.")
@@ -28,7 +28,7 @@ class PointTest {
     void add() {
         Point point = new Point(1L);
         Point result = point.add(new Point(2L));
-        assertEquals(3L, result.amount());
+        assertEquals(3L, result.toLong());
     }
 
     @DisplayName("금액을 빼면, 두 금액의 차를 반환한다.")
@@ -36,7 +36,7 @@ class PointTest {
     void subtract() {
         Point point = new Point(3L);
         Point result = point.subtract(new Point(2L));
-        assertEquals(1L, result.amount());
+        assertEquals(1L, result.toLong());
     }
 
     @DisplayName("금액을 곱하면, 금액을 곱한 결과를 반환한다.")
@@ -44,7 +44,7 @@ class PointTest {
     void multiply() {
         Point point = new Point(2L);
         Point result = point.multiply(3);
-        assertEquals(6L, result.amount());
+        assertEquals(6L, result.toLong());
     }
 
     @DisplayName("금액이 음수일 경우, `IllegalArgumentException`이 발생한다.")

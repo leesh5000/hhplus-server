@@ -62,7 +62,7 @@ class ListProductsControllerTest {
         for (int i = 0; i < response.getBody().content().size(); i++) {
             assertThat(response.getBody().content().get(i).productId()).isEqualTo(products.get(i).getId().toString());
             assertThat(response.getBody().content().get(i).productName()).isEqualTo(products.get(i).getName());
-            assertThat(response.getBody().content().get(i).price()).isEqualTo(products.get(i).getPrice().amount().intValue());
+            assertThat(response.getBody().content().get(i).price()).isEqualTo(products.get(i).getPrice().toLong().intValue());
             assertThat(response.getBody().content().get(i).stock()).isEqualTo(products.get(i).getStock());
         }
 
