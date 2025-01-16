@@ -10,7 +10,7 @@ public record ListProductsResponse(
         String productName,
         Integer price,
         Integer stock,
-        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssZ")
+        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
         LocalDateTime createdAt
 ) {
     public static ListProductsResponse from(ListProductsResult result) {
