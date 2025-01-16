@@ -4,15 +4,19 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.hhplus.be.server.product.domain.service.ProductService;
+import kr.hhplus.be.server.product.domain.service.dto.response.TopSellingProductResult;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @Tag(name = "상품 API")
 @RequiredArgsConstructor
 @RestController
-public class TopSoldProductsController {
+public class ListPopularProducts {
 
     private final ProductService productService;
 
@@ -33,11 +37,12 @@ public class TopSoldProductsController {
                     )
             }
     )
-    @GetMapping(value = "/products/top-sold", produces = "application/json")
-    public void topSoldProducts(
+    @GetMapping(value = "/products/top-sales", produces = "application/json")
+    public ResponseEntity<List<TopSellingProductResult>> listPopularProducts(
             @RequestParam(value = "day", defaultValue = "3") Integer day,
             @RequestParam(value = "limit", defaultValue = "5") Integer limit
     ) {
-        productService.getPopularProducts(day, limit);
+        List<TopSellingProductResult> popularProducts = productService.getPopularProducts(day, limit);
+        return ResponseEntity.ok(popularProducts);
     }
 }
