@@ -19,16 +19,6 @@ public class CouponRepositoryImpl implements CouponRepository {
     private final IssuedCouponJpaRepository issuedCouponJpaRepository;
 
     @Override
-    public Coupon getCoupon(Long couponId) {
-        return null;
-    }
-
-    @Override
-    public IssuedCoupon getIssuedCoupon(Long issuedCouponId) {
-        return null;
-    }
-
-    @Override
     public List<IssuedCoupon> findIssuedCouponsByUserId(Long userId) {
         return issuedCouponJpaRepository.findAllByUserId(userId);
     }
