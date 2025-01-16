@@ -48,7 +48,7 @@ class IssueCouponControllerTest {
 
         // then 1 : 201 Created 상태코와
         HttpStatusCode statusCode = response.getStatusCode();
-        Assertions.assertThat(statusCode).isEqualTo(HttpStatusCode.valueOf(200));
+        Assertions.assertThat(statusCode).isEqualTo(HttpStatusCode.valueOf(201));
         // then 2 : Location 헤더에 쿠폰 발급 URL 을 응답해야 한다.
         Assertions.assertThat(response.getHeaders().getFirst("Location")).isEqualTo("http://localhost/api/v1/users/1/coupons/1");
 
