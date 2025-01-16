@@ -70,7 +70,7 @@ public class OrderAndPayControllerIntegrationTest {
             """)
     @SqlGroup({
             @Sql(value = "/sql/insert_order_and_pay_test_data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
-            @Sql(value = "/sql/delete_expired_coupon.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+            @Sql(value = "/sql/delete_order_and_pay_test_data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     })
     @Test
     void order_and_pay_test() throws Exception {
