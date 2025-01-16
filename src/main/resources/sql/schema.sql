@@ -94,6 +94,7 @@ CREATE TABLE ORDERS (
                         id BIGINT NOT NULL AUTO_INCREMENT,
                         order_price BIGINT NOT NULL COMMENT '주문 가격',
                         user_id BIGINT NOT NULL,
+                        ordered_at DATETIME NULL COMMENT '주문 일시',
                         created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                         last_modified_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                         PRIMARY KEY (id)

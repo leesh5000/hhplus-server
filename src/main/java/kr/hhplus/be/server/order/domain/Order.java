@@ -10,6 +10,7 @@ import kr.hhplus.be.server.user.domain.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +30,8 @@ public class Order extends BaseEntity {
     private Point orderPrice = Point.ZERO;
     @Column(name = "user_id", nullable = false)
     private Long userId;
+    @Column(name = "ordered_at")
+    private LocalDateTime orderedAt;
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "order")
     private final List<OrderProduct> orderProducts = new ArrayList<>();
 

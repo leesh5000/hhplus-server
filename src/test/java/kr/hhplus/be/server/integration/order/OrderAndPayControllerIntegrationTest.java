@@ -81,7 +81,7 @@ public class OrderAndPayControllerIntegrationTest {
         Product product1 = productService.getById(100L);
         Product product2 = productService.getById(101L);
         Product product3 = productService.getById(102L);
-        Coupon coupon = couponService.getById(1L);
+        Coupon coupon = couponService.getByIdWithPessimisticLock(1L);
         Point totalOrderPrice = product1.getPrice().multiply(2)
                 .add(product2.getPrice().multiply(3))
                 .add(product3.getPrice().multiply(1));
