@@ -12,4 +12,5 @@ spring:
     init:
       mode: always
       schema-locations: classpath:sql/schema.sql
-      data-locations: none-data.sql
+      # 테스트 코드는 테스트 실행 시에 필요한 데이터들을 별도 파일로 관리하도록 설정
+      data-locations: classpath:sql/none-data.sql

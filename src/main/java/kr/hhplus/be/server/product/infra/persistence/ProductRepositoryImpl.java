@@ -47,7 +47,7 @@ public class ProductRepositoryImpl implements ProductRepository {
 
     @Override
     public Optional<Product> findById(Long productId) {
-        return Optional.empty();
+        return productJpaRepository.findById(productId);
     }
 
     @Override
@@ -68,7 +68,7 @@ public class ProductRepositoryImpl implements ProductRepository {
                         orderProduct.quantity.sum()
                 ))
                 .from(orderProduct)
-                .join(orders).on(orderProduct.orderId.eq(orders.id))  // ID로 조인
+                .join(orders).on(orderProduct.order.eq(orders))  // ID로 조인
                 .join(product).on(orderProduct.productId.eq(product.id))
                 .where(orders.createdAt.goe(LocalDateTime.from(LocalDate.now().minusDays(days))))
                 .groupBy(product.id, product.name)

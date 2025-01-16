@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.product.interfaces;
 
 import kr.hhplus.be.server.common.domain.dto.response.PageDetails;
-import kr.hhplus.be.server.mock.TestContainer;
+import kr.hhplus.be.server.mock.TestContainers;
 import kr.hhplus.be.server.mock.domain.ProductFixture;
 import kr.hhplus.be.server.product.domain.Product;
 import kr.hhplus.be.server.product.interfaces.dto.response.ListProductsResponse;
@@ -18,52 +18,56 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @DisplayName("컨트롤러 단위 테스트 : 상품 목록 조회")
 class ListProductsControllerTest {
 
-    @DisplayName("현재 페이지와 페이지 크기를 전달하면," +
-            "200 응답과 " +
-            "페이지 정보 + 상품 목록을 응답한다.")
+    @DisplayName("""
+            상품이 3개 존재하고,
+            
+            0번 페이지의 5개 사이즈로 상품 목록을 요청하면,
+            
+            {200 응답}과
+            {현재 페이지가 0, 전체 페이지가 1, 총 상품 수가 3인 페이지 정보}와
+            일치하는 {ID, 상품명, 가격, 재고 수}를 응답해야 한다.
+            """)
     @Test
     void listProducts() {
 
         // Mocking
-        TestContainer testContainer = new TestContainer();
+        TestContainers testContainers = new TestContainers();
+        ListProductsController sut = testContainers.listProductsController;
 
-        Product productFixture1 = ProductFixture.create(1L);
-        Product productFixture2 = ProductFixture.create(2L);
-        Product productFixture3 = ProductFixture.create(3L);
+        // given : 상품이 3개 존재
+        Product product1 = ProductFixture.create(1L);
+        Product product2 = ProductFixture.create(2L);
+        Product product3 = ProductFixture.create(3L);
         List<Product> products = new ArrayList<>(
                 List.of(
-                        productFixture1,
-                        productFixture2,
-                        productFixture3
+                        product1,
+                        product2,
+                        product3
                 )
         );
+        testContainers.productRepository.saveAll(products);
 
-        testContainer.productRepository.saveAll(products);
-
-        ListProductsController sut = testContainer.listProductsController;
-
-        // given
-        int page = 0;
-        int size = 20;
-
-        // when
-        ResponseEntity<PageDetails<List<ListProductsResponse>>> response = sut.listProducts(page, size);
+        // when : 상품 목록을 요청하면
+        ResponseEntity<PageDetails<List<ListProductsResponse>>> response = sut.listProducts(0, 5);
 
         // then 1 : 200 응답
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        // then 2 : 페이지 정보 + 상품 목록
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().page()).isEqualTo(0);
-        assertThat(response.getBody().size()).isEqualTo(20);
-        assertThat(response.getBody().totalElements()).isEqualTo(3);
-        assertThat(response.getBody().totalPages()).isEqualTo(1);
+        // then 2 : 현재 페이지가 0, 전체 페이지가 1, 총 상품 수가 3인 페이지 정보
+        PageDetails<List<ListProductsResponse>> pageDetails = response.getBody();
+        assertThat(pageDetails.page()).isEqualTo(0);
+        assertThat(pageDetails.totalPages()).isEqualTo(1);
+        assertThat(pageDetails.totalElements()).isEqualTo(3);
 
-        for (int i = 0; i < response.getBody().content().size(); i++) {
-            assertThat(response.getBody().content().get(i).productId()).isEqualTo(products.get(i).getId().toString());
-            assertThat(response.getBody().content().get(i).productName()).isEqualTo(products.get(i).getName());
-            assertThat(response.getBody().content().get(i).price()).isEqualTo(products.get(i).getPrice().toLong().intValue());
-            assertThat(response.getBody().content().get(i).stock()).isEqualTo(products.get(i).getStock());
+        List<ListProductsResponse> listProductsResponses = pageDetails.content();
+        for (int i = 0; i < listProductsResponses.size(); i++) {
+            ListProductsResponse listProductsResponse = listProductsResponses.get(i);
+            Product product = products.get(i);
+            // then 3 : 일치하는 ID, 상품명, 가격, 재고 수를 응답해야 한다.
+            assertThat(listProductsResponse.productId()).isEqualTo(product.getId().toString());
+            assertThat(listProductsResponse.productName()).isEqualTo(product.getName());
+            assertThat(listProductsResponse.price()).isEqualTo(product.getPrice().toInt());
+            assertThat(listProductsResponse.stock()).isEqualTo(product.getStock());
         }
 
     }

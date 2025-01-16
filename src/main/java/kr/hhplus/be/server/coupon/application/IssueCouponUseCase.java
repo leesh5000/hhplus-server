@@ -2,7 +2,6 @@ package kr.hhplus.be.server.coupon.application;
 
 import jakarta.transaction.Transactional;
 import kr.hhplus.be.server.coupon.domain.service.CouponService;
-import kr.hhplus.be.server.coupon.domain.service.dto.request.IssueCouponCommand;
 import kr.hhplus.be.server.user.domain.User;
 import kr.hhplus.be.server.user.domain.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -16,9 +15,11 @@ public class IssueCouponUseCase {
     private final UserService userService;
     private final CouponService couponService;
 
-    public void issue(Long userId, Long couponId) {
+    public void issue(
+            Long userId,
+            Long couponId) {
+
         User user = userService.getById(userId);
-        IssueCouponCommand command = new IssueCouponCommand(user, couponId);
-        couponService.issueCoupon(command);
+        couponService.issue(couponId, user);
     }
 }

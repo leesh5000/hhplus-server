@@ -27,13 +27,13 @@ docker compose -f ./infra/docker-compose-db.yml up -d
 
 2. (IntelliJ IDEA) 애플리케이션 실행
 
-IntelliJ IDEA에서 `ServerApplication` 클래스를 실행합니다.
+IntelliJ IDEA 에서 `ServerApplication` 클래스를 실행합니다.
 
 # 프로젝트 관련 문서
 
 - [요구사항 분석 문서](./docs/requirements_analysis.md)
 - [클래스 다이어그램](./docs/class-diagram.md)
-- [ERD](./docs/erd.md)
+- [ERD](./docs/erd.md)````
 - [API 문서 (OAS 3)](./docs/e-commerce-api.yml)
   - 해당 문서를 [Swagger Editor](https://editor.swagger.io/)에 붙여넣으면 시각적으로 확인할 수 있습니다.
 
@@ -47,3 +47,6 @@ IntelliJ IDEA에서 `ServerApplication` 클래스를 실행합니다.
 # 참고 자료
 
 - [TestContainers](https://testcontainers.com/)
+
+new 없애기
+builder 로 테스트 픽스쳐 바꾸기

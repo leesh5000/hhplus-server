@@ -1,13 +1,13 @@
 package kr.hhplus.be.server.order.interfaces.dto;
 
-import kr.hhplus.be.server.order.application.dto.request.PlaceOrderCriteria;
+import kr.hhplus.be.server.order.application.dto.request.OrderAndPayCriteria;
 
 import java.util.List;
 
 public record PlaceOrderRequest(
         Long userId,
         List<OrderProductRequest> products,
-        List<Long> issuedCouponIds
+        List<Long> applyCouponIds
 ) {
 
     public record OrderProductRequest(
@@ -16,16 +16,16 @@ public record PlaceOrderRequest(
     ) {
     }
 
-    public PlaceOrderCriteria toCriteria() {
-        return new PlaceOrderCriteria(
+    public OrderAndPayCriteria toCriteria() {
+        return new OrderAndPayCriteria(
                 userId,
                 products.stream()
-                        .map(product -> new PlaceOrderCriteria.OrderProductCriteria(
+                        .map(product -> new OrderAndPayCriteria.OrderProduct(
                                 product.productId(),
                                 product.quantity()
                         ))
                         .toList(),
-                issuedCouponIds
+                applyCouponIds
         );
     }
 }

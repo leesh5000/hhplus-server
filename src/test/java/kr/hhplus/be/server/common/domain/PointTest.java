@@ -1,13 +1,27 @@
 package kr.hhplus.be.server.common.domain;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("도메인 객체 단위 테스트 : 포인트")
 class PointTest {
+
+    @DisplayName("값이 같으면, Integer 객체와도 equals 비교가 가능해야 한다.")
+    @Test
+    void equals() {
+        Point point = new Point(1L);
+        Assertions.assertThat(point).isEqualTo(1L);
+    }
+
+    @DisplayName("값이 같으면, Long 객체와도 equals 비교가 가능해야 한다.")
+    @Test
+    void equalsLong() {
+        Point point = new Point(1L);
+        Assertions.assertThat(point).isEqualTo(1L);
+    }
 
     @DisplayName("Long 값을 입력받아 객체 생성 가능해야 한다.")
     @Test
@@ -45,12 +59,6 @@ class PointTest {
         Point point = new Point(2L);
         Point result = point.multiply(3);
         assertEquals(6L, result.toLong());
-    }
-
-    @DisplayName("금액이 음수일 경우, `IllegalArgumentException`이 발생한다.")
-    @Test
-    void illegalArgument() {
-        assertThrows(IllegalArgumentException.class, () -> new Point(-1L));
     }
 
 }

@@ -10,4 +10,10 @@ public class WalletFixture {
     public static Wallet create(Long id) {
         return new Wallet(id);
     }
+
+    public static Wallet create(Long id, Long initialBalance) {
+        Wallet wallet = new Wallet(id);
+        wallet.deposit(initialBalance);
+        return wallet;
+    }
 }

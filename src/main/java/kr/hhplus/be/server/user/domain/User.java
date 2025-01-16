@@ -3,32 +3,28 @@ package kr.hhplus.be.server.user.domain;
 import jakarta.persistence.*;
 import kr.hhplus.be.server.common.domain.BaseEntity;
 import kr.hhplus.be.server.common.domain.Point;
+import kr.hhplus.be.server.coupon.domain.Coupon;
 import kr.hhplus.be.server.coupon.domain.IssuedCoupon;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
+import static jakarta.persistence.FetchType.EAGER;
 
-import static jakarta.persistence.FetchType.LAZY;
-
+@Getter
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 @Table(name = "USER")
 @Entity
 public class User extends BaseEntity {
 
-    @Getter
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     private Long id;
-    @Getter
     private String name;
-    @Getter
-    @OneToOne(fetch = LAZY, cascade = CascadeType.ALL, optional = false)
+    @OneToOne(fetch = EAGER, cascade = CascadeType.ALL, optional = false)
     @JoinColumn(name = "id", referencedColumnName = "user_id", nullable = false)
     private Wallet wallet = new Wallet();
-    @OneToMany(fetch = LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<IssuedCoupon> coupons = new ArrayList<>();
+    @Embedded
+    private final MyCoupons myCoupons = new MyCoupons();
 
     public User(Long id, String name) {
         this.id = id;
@@ -59,11 +55,8 @@ public class User extends BaseEntity {
         return wallet.getBalance();
     }
 
-    public boolean isSaved() {
-        return id != null;
-    }
-
     public WalletHistory deductPoint(Point deductPoint) {
         return wallet.withdraw(deductPoint.toInt());
     }
+
 }

@@ -5,7 +5,7 @@ import kr.hhplus.be.server.common.domain.BaseEntity;
 import kr.hhplus.be.server.common.domain.BusinessException;
 import kr.hhplus.be.server.common.domain.ErrorCode;
 import kr.hhplus.be.server.common.domain.Point;
-import kr.hhplus.be.server.common.domain.service.ClockHolder;
+import kr.hhplus.be.server.common.domain.service.DateTimeHolder;
 import kr.hhplus.be.server.user.domain.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,14 +24,12 @@ public class IssuedCoupon extends BaseEntity {
     @Id
     private Long id;
     private Boolean used = Boolean.FALSE;
-    @Column(name = "used_at", nullable = true)
+    @Column(name = "used_at")
     private LocalDateTime usedAt = null;
     @ManyToOne(optional = false, cascade = CascadeType.PERSIST)
     private Coupon coupon;
     @Column(name = "user_id", nullable = false)
     private Long userId;
-    @Column(name = "payment_id", nullable = true)
-    private Long paymentId;
 
     public IssuedCoupon(Long userId, Coupon coupon) {
         this(null, userId, coupon);
@@ -45,10 +43,6 @@ public class IssuedCoupon extends BaseEntity {
 
     public Long getCouponId() {
         return coupon.getId();
-    }
-
-    public Boolean isSaved() {
-        return id != null;
     }
 
     public Boolean isUsed() {
@@ -71,17 +65,21 @@ public class IssuedCoupon extends BaseEntity {
         return getCreatedAt();
     }
 
-    public void use(User user, ClockHolder clockHolder, Long paymentId) {
+    public Point use(
+            User user,
+            DateTimeHolder dateTimeHolder) {
+
         verifyCouponOwner(user);
-        LocalDateTime now = clockHolder.now();
-        verifyCouponNotExpire(now);
+        verifyCouponNotExpire(dateTimeHolder);
         verifyCouponNotUsed();
         this.used = Boolean.TRUE;
-        this.usedAt = now;
-        this.paymentId = paymentId;
+        this.usedAt = dateTimeHolder.now();
+
+        return this.getDiscountAmount();
     }
 
-    private void verifyCouponNotExpire(LocalDateTime now) {
+    private void verifyCouponNotExpire(DateTimeHolder dateTimeHolder) {
+        LocalDateTime now = dateTimeHolder.now();
         if (coupon.isExpire(now)) {
             throw new BusinessException(
                     ErrorCode.EXPIRED_COUPON,

@@ -1,5 +1,7 @@
 package kr.hhplus.be.server.user.domain;
 
+import kr.hhplus.be.server.common.domain.BusinessException;
+import kr.hhplus.be.server.common.domain.ErrorCode;
 import kr.hhplus.be.server.common.domain.Point;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -8,24 +10,35 @@ import org.junit.jupiter.api.Test;
 @DisplayName("도메인 단위 테스트 : 지갑 & 지갑 내역")
 class WalletTest {
 
-    @DisplayName("포인트를 입력하여, 지갑 잔고를 충전하면, 입력한 값 만큼 잔고가 추가되고 지갑 내역은 입력한 포인트를 양수로 가져야 한다.")
+    @DisplayName("""
+            ID가 1인 지갑이 존재하고,
+            
+            1000원을 입금하면,
+            
+            지갑의 잔고가 {1000원}이 되고,
+            {1000원인 지갑 내역}을 응답해야 한다.
+            """)
     @Test
     void charge() {
-        // given
+
+        // given : ID가 1인 지갑이 존재
         Wallet wallet = new Wallet(1L);
-        int amount = 1000;
 
-        // when
-        WalletHistory walletHistory = wallet.deposit(amount);
+        // when : 1000원을 충전하면
+        WalletHistory walletHistory = wallet.deposit(1000);
 
-        // then
-        Long actualWalletBalance = wallet.getBalance().toLong();
-        int actualWalletHistoryAmount = walletHistory.getAmount();
-        Assertions.assertThat(actualWalletBalance).isEqualTo(amount);
-        Assertions.assertThat(actualWalletHistoryAmount).isEqualTo(amount);
+        // then 1 : 지갑의 잔고가 1000원이 되고,
+        Assertions.assertThat(wallet.getBalance().toLong()).isEqualTo(1000);
+
+        // then 2 : 1000원인 지갑 내역을 응답해야 한다.
+        Assertions.assertThat(walletHistory.getAmount()).isEqualTo(1000);
     }
 
-    @DisplayName("최초 지갑 생성 시에는 잔고는 0원 이어야 한다.")
+    @DisplayName("""
+            최초 지갑 생성 시에는,
+            
+            잔고는 {0원}이어야 한다.
+            """)
     @Test
     void getBalance() {
         // given
@@ -38,21 +51,52 @@ class WalletTest {
         Assertions.assertThat(balance.toLong()).isEqualTo(0);
     }
 
-    @DisplayName("포인트를 입력하여, 지갑에서 잔고를 인출하면, 입력한 값 만큼 잔고가 차감되고 지갑 내역은 입력한 포인트를 음수로 가져야한다.")
+    @DisplayName("""
+            ID가 1인 지갑이 존재하고,
+            
+            1000원을 입금 후, 1000원을 출금하면,
+            
+            지갑의 잔고가 {0원}이 되고,
+            {-1000원인 지갑 내역}을 응답해야 한다.
+            """)
     @Test
     void withdraw() {
-        // given
+
+        // given : ID가 1인 지갑이 존재
         Wallet wallet = new Wallet(1L);
-        int amount = 1000;
-        wallet.deposit(amount);
 
-        // when
-        WalletHistory walletHistory = wallet.withdraw(amount);
+        // when : 1000원을 충전하고, 1000원을 출금하면
+        wallet.deposit(1000);
+        WalletHistory walletHistory = wallet.withdraw(1000);
 
-        // then
-        Long actualWalletBalance = wallet.getBalance().toLong();
-        int actualWalletHistoryAmount = walletHistory.getAmount();
-        Assertions.assertThat(actualWalletBalance).isEqualTo(0);
-        Assertions.assertThat(actualWalletHistoryAmount).isEqualTo(-amount);
+        // then 1 : 지갑의 잔고가 0원이 되고,
+        Assertions.assertThat(wallet.getBalance().toLong()).isEqualTo(0);
+
+        // then 2 : -1000원인 지갑 내역을 응답해야 한다.
+        Assertions.assertThat(walletHistory.getAmount()).isEqualTo(-1000);
+    }
+
+    @DisplayName("""
+            ID가 1이고, 잔고가 0원인 지갑이 존재하고,
+            
+            1000원을 인출하면,
+            
+            {BusinessException}이 발생하고,
+            에러 코드가 {INSUFFICIENT_BALANCE}여야 한다.
+            """)
+    @Test
+    void withdraw_Fail() {
+
+        // given : ID가 1이고, 잔고가 0원인 지갑이 존재
+        Wallet wallet = new Wallet(1L);
+
+        Assertions.assertThatThrownBy(
+                // when : 1000원을 인출하면
+                () -> wallet.withdraw(1000)
+                )
+                // then 1 : {BusinessException}이 발생하고,
+                .isInstanceOf(BusinessException.class)
+                // then 2 : 에러 코드가 {INSUFFICIENT_BALANCE}여야 한다.
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.INSUFFICIENT_BALANCE);
     }
 }

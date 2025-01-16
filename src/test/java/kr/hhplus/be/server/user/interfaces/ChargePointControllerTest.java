@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.user.interfaces;
 
-import kr.hhplus.be.server.mock.TestContainer;
+import kr.hhplus.be.server.mock.TestContainers;
+import kr.hhplus.be.server.mock.domain.UserFixture;
 import kr.hhplus.be.server.user.domain.User;
 import kr.hhplus.be.server.user.interfaces.dto.request.UserPointRequest;
 import org.assertj.core.api.Assertions;
@@ -15,28 +16,33 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 class ChargePointControllerTest {
 
     @Test
-    @DisplayName("정상적인 값을 요청한 경우, 200 응답과 사용자 잔액 조회 API URL을 Location 헤더에 반환해야한다.")
+    @DisplayName("""
+            ID가 1인 사용자가 존재할 때,
+            
+            1000 포인트를 충전하면,
+            
+            {200 응답}과
+            {사용자 잔액 조회 API URL} 을 Location 헤더에 반환해야 한다.
+            """)
     void chargeBalance_Success() {
 
         // Mocking
-        TestContainer testContainer = new TestContainer();
-        ChargePointController sut = testContainer
-                .chargePointController;
+        TestContainers testContainers = new TestContainers();
+        ChargePointController sut = testContainers.chargePointController;
         MockHttpServletRequest mockRequest = new MockHttpServletRequest("POST", "/api/v1/users/1/points");
-        RequestContextHolder.setRequestAttributes(
-                new ServletRequestAttributes(mockRequest)
-        );
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(mockRequest));
 
-        // given : ID가 1이고, 이름이 "항해99 유저"인 유저가 있을 때,
-        User userFixture = new User(1L, "항해99 유저");
-        testContainer.userRepository.save(userFixture);
+        // given : ID가 1인 사용자가 존재
+        User user = UserFixture.create(1L);
+        testContainers.userRepository.save(user);
 
-        // When : 1000 포인트를 충전하면
+        // when : 1000 포인트를 충전하면
         UserPointRequest request = new UserPointRequest(1000);
-        ResponseEntity<Void> response = sut.charge(userFixture.getId(), request);
+        ResponseEntity<Void> response = sut.charge(1L, request);
 
-        // Then : 200 응답과 사용자 잔액 조회 API URL 을 Location 헤더에 반환해야한다.
+        // then 1 : 200 응답
         Assertions.assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
+        // then 2 : 사용자 잔액 조회 API URL 을 Location 헤더에 반환해야 한다.
         Assertions.assertThat(response.getHeaders().getFirst("Location")).isEqualTo("http://localhost/api/v1/users/1/points");
 
     }

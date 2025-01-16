@@ -2,6 +2,6 @@ package kr.hhplus.be.server.common.domain.service;
 
 import java.time.LocalDateTime;
 
-public interface ClockHolder {
+public interface DateTimeHolder {
     LocalDateTime now();
 }

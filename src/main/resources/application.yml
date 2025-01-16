@@ -42,6 +42,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
+    show-sql: true
   sql:
     init:
       mode: always

@@ -6,8 +6,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import kr.hhplus.be.server.order.application.PlaceOrderUseCase;
-import kr.hhplus.be.server.order.application.dto.request.PlaceOrderCriteria;
+import kr.hhplus.be.server.order.application.OrderAndPayUseCase;
+import kr.hhplus.be.server.order.application.dto.request.OrderAndPayCriteria;
 import kr.hhplus.be.server.order.interfaces.dto.PlaceOrderRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,17 +18,17 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 
-@Tag(name = "주문 API")
+@Tag(name = "주문/결제 API")
 @RequiredArgsConstructor
 @RestController
-public class PlaceOrderController {
+public class OrderAndPayController {
 
-    private final PlaceOrderUseCase useCase;
+    private final OrderAndPayUseCase useCase;
 
-    @Operation(summary = "주문 생성", description = "주문을 생성합니다.",
-            tags = {"주문 API"},
+    @Operation(summary = "주문/결제", description = "주문/결제 요청",
+            tags = {"주문/결제 API"},
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "주문 생성 요청",
+                    description = "요청 본문",
                     required = true,
                     content = {
                             @Content(
@@ -55,16 +55,21 @@ public class PlaceOrderController {
             }
     )
     @PostMapping("/api/v1/orders")
-    public ResponseEntity<Void> placeOrder(
-            @RequestBody PlaceOrderRequest request
+    public ResponseEntity<Void> orderAndPay(
+            @RequestBody
+            PlaceOrderRequest request
     ) {
-        PlaceOrderCriteria criteria = request.toCriteria();
-        useCase.placeOrder(criteria);
 
-        URI userPointsUri = ServletUriComponentsBuilder.fromCurrentRequest()
-                .build()
+        OrderAndPayCriteria criteria = request.toCriteria();
+        Long orderId = useCase.orderAndPay(criteria);
+
+        URI orderUri = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{orderId}")
+                .buildAndExpand(orderId)
                 .toUri();
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity
+                .created(orderUri)
+                .build();
     }
 }
