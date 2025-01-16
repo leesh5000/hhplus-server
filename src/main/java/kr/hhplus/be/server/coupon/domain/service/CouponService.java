@@ -49,8 +49,8 @@ public class CouponService {
                 .toList();
     }
 
-    public Coupon getById(Long couponId) {
-        return couponRepository.findById(couponId)
+    public Coupon getByIdWithPessimisticLock(Long couponId) {
+        return couponRepository.findByIdWithPessimisticLock(couponId)
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.RESOURCE_NOT_FOUND,
                         "ID가 %s인 쿠폰이 존재하지 않습니다.".formatted(couponId)
@@ -58,7 +58,7 @@ public class CouponService {
     }
 
     public void issue(Long couponId, User user) {
-        Coupon coupon = getById(couponId);
+        Coupon coupon = getByIdWithPessimisticLock(couponId);
         IssuedCoupon issuedCoupon = coupon.issue(user,
                 dateTimeHolder.now());
         couponRepository.saveIssuedCoupon(issuedCoupon);

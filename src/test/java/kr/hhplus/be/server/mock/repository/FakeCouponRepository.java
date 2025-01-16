@@ -34,7 +34,7 @@ public class FakeCouponRepository implements CouponRepository {
     }
 
     @Override
-    public Optional<Coupon> findById(Long couponId) {
+    public Optional<Coupon> findByIdWithPessimisticLock(Long couponId) {
         return couponData
                 .stream()
                 .filter(coupon -> coupon.getId().equals(couponId))
