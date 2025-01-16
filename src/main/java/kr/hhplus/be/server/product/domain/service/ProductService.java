@@ -9,6 +9,7 @@ import kr.hhplus.be.server.product.domain.repository.ProductRepository;
 import kr.hhplus.be.server.product.domain.service.dto.request.PrepareProductCommand;
 import kr.hhplus.be.server.product.domain.service.dto.response.ListProductsResult;
 import kr.hhplus.be.server.product.domain.service.dto.response.PrepareProductResult;
+import kr.hhplus.be.server.product.domain.service.dto.response.TopSellingProductResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,8 +22,8 @@ public class ProductService {
 
     private final ProductRepository productRepository;
 
-    public List<Product> getPopularProducts(Integer days, Integer limit) {
-        return productRepository.findPopularProducts(days, limit);
+    public List<TopSellingProductResult> getPopularProducts(Integer days, Integer limit) {
+        return productRepository.queryPopularProducts(days, limit);
     }
 
     public PageDetails<List<ListProductsResult>> list(int page, int size) {

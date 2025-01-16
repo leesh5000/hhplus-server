@@ -57,7 +57,7 @@ public class ListProductsController {
     )
     @GetMapping(value = "/api/v1/products", produces = "application/json")
     public ResponseEntity<PageDetails<List<ListProductsResponse>>> listProducts(
-            @RequestParam(value = "page", defaultValue = "1", required = false) int page,
+            @RequestParam(value = "page", defaultValue = "0", required = false) int page,
             @RequestParam(value = "size", defaultValue = "20", required = false) int size
     ) {
         PageDetails<List<ListProductsResult>> pageDetails = service.list(page, size);

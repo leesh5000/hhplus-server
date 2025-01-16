@@ -19,16 +19,6 @@ public class CouponRepositoryImpl implements CouponRepository {
     private final IssuedCouponJpaRepository issuedCouponJpaRepository;
 
     @Override
-    public Coupon getCoupon(Long couponId) {
-        return null;
-    }
-
-    @Override
-    public IssuedCoupon getIssuedCoupon(Long issuedCouponId) {
-        return null;
-    }
-
-    @Override
     public List<IssuedCoupon> findIssuedCouponsByUserId(Long userId) {
         return issuedCouponJpaRepository.findAllByUserId(userId);
     }
@@ -39,7 +29,7 @@ public class CouponRepositoryImpl implements CouponRepository {
     }
 
     @Override
-    public Optional<Coupon> findById(Long couponId) {
+    public Optional<Coupon> findByIdWithPessimisticLock(Long couponId) {
         return couponJpaRepository.findById(couponId);
     }
 

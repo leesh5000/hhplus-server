@@ -3,6 +3,7 @@ package kr.hhplus.be.server.mock.repository;
 import kr.hhplus.be.server.common.domain.dto.response.PageDetails;
 import kr.hhplus.be.server.product.domain.Product;
 import kr.hhplus.be.server.product.domain.repository.ProductRepository;
+import kr.hhplus.be.server.product.domain.service.dto.response.TopSellingProductResult;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -61,7 +62,7 @@ public class FakeProductRepository implements ProductRepository {
     }
 
     @Override
-    public List<Product> findPopularProducts(Integer days, Integer limit) {
+    public List<TopSellingProductResult> queryPopularProducts(Integer days, Integer limit) {
         return List.of();
     }
 

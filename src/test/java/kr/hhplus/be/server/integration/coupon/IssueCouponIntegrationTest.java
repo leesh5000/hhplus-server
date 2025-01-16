@@ -13,6 +13,13 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlGroup;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -40,7 +47,7 @@ public class IssueCouponIntegrationTest {
     void issue_coupon_test_1() throws Exception {
 
         // given : ID가 1인 유저와 ID가 1인 쿠폰이 존재 (resources/sql/data.sql 참고)
-        Coupon coupon = couponService.getById(1L);
+        Coupon coupon = couponService.getByIdWithPessimisticLock(1L);
         int stock = coupon.getStock();
 
         // when : 쿠폰 발급 요청을 하면
@@ -54,7 +61,7 @@ public class IssueCouponIntegrationTest {
                 .andExpect(header().string("Location", "http://localhost/api/v1/users/1/coupons/1"));
 
         // then 3 : 쿠폰 재고가 1 감소해야 한다.
-        Coupon updatedCoupon = couponService.getById(1L);
+        Coupon updatedCoupon = couponService.getByIdWithPessimisticLock(1L);
         int updatedStock = updatedCoupon.getStock();
         Assertions.assertThat(updatedStock).isEqualTo(stock - 1);
     }
@@ -112,7 +119,7 @@ public class IssueCouponIntegrationTest {
 
         // given : 유효기간이 만료된 쿠폰이 존재 (resources/sql/insert_expired_coupon.sql 참고)
         Long expiredCouponId = 100L;
-        Coupon coupon = couponService.getById(expiredCouponId);
+        Coupon coupon = couponService.getByIdWithPessimisticLock(expiredCouponId);
         int stock = coupon.getStock();
 
         // when : 쿠폰 발급 요청을 하면
@@ -128,8 +135,55 @@ public class IssueCouponIntegrationTest {
                 .andExpect(jsonPath("$.message").value("이미 만료일이 지난 쿠폰입니다."));
 
         // then 4 : 쿠폰 재고는 그대로여야 한다.
-        Coupon updatedCoupon = couponService.getById(expiredCouponId);
+        Coupon updatedCoupon = couponService.getByIdWithPessimisticLock(expiredCouponId);
         assertEquals(stock, updatedCoupon.getStock());
     }
+
+    @DisplayName("""
+    동시에 30명의 사용자가 재고가 50개인 쿠폰을
+    발급 요청할 때,
+    {201 Created} 응답과
+    정확히 {쿠폰 재고가 30 감소}해야 하고,
+    {30명의 유저 모두 쿠폰을 발급}받아야 한다.
+    """)
+    @SqlGroup({
+            @Sql(value = "/sql/insert_coupon_concurrency_test.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+            @Sql(value = "/sql/delete_coupon_concurrency_test.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    })
+    @Test
+    void issue_coupon_concurrently_test() throws Exception {
+        // 동시 실행할 쓰레드 개수 (유저 수)
+        int userCount = 30;
+
+        // 동시 실행 스레드 풀 생성
+        ExecutorService executorService = Executors.newFixedThreadPool(userCount);
+
+        // 병렬로 실행될 작업 목록
+        List<Callable<Boolean>> tasks = new ArrayList<>();
+
+        for (int i = 100; i < userCount + 100; i++) {
+            final int userId = i + 1; // 1 ~ 30
+            tasks.add(() -> {
+                // mockMvc 호출 -> 성공 여부를 반환
+                mockMvc.perform(
+                        post("/api/v1/users/{userId}/coupons/{couponId}", userId, 101)
+                                .contentType(MediaType.APPLICATION_JSON)
+                ).andExpect(status().isCreated());
+                return true;  // 성공했다고 가정
+            });
+        }
+
+        // 모든 작업(30개)을 동시에 실행
+        executorService.invokeAll(tasks);
+        executorService.shutdown();
+
+        // 이후 쿠폰 재고(예: 50 -> 20)로 잘 감소했는지, 30명이 정상 발급받았는지 등의 검증 로직
+        // 보통 CouponRepository, CouponInventoryRepository 등을 통해 DB 조회 후 assert
+        int expectedStock = 20; // 50 - 30
+        int actualStock = couponService.getByIdWithPessimisticLock(101L).getStock();
+        assertThat(actualStock).isEqualTo(expectedStock);
+    }
+
+
 
 }

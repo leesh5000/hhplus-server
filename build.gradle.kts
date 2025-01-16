@@ -59,6 +59,9 @@ dependencies {
 	annotationProcessor("com.querydsl:querydsl-apt:${queryDslVersion}:jakarta")
 	annotationProcessor("jakarta.annotation:jakarta.annotation-api")
 	annotationProcessor("jakarta.persistence:jakarta.persistence-api")
+
+	// 날짜 타입 지원을 위한 추가 라이브러리
+	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2")
 }
 
 tasks.withType<Test> {

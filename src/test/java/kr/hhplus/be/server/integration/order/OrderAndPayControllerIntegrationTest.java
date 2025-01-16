@@ -70,7 +70,7 @@ public class OrderAndPayControllerIntegrationTest {
             """)
     @SqlGroup({
             @Sql(value = "/sql/insert_order_and_pay_test_data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
-            @Sql(value = "/sql/delete_expired_coupon.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+            @Sql(value = "/sql/delete_order_and_pay_test_data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     })
     @Test
     void order_and_pay_test() throws Exception {
@@ -81,7 +81,7 @@ public class OrderAndPayControllerIntegrationTest {
         Product product1 = productService.getById(100L);
         Product product2 = productService.getById(101L);
         Product product3 = productService.getById(102L);
-        Coupon coupon = couponService.getById(1L);
+        Coupon coupon = couponService.getByIdWithPessimisticLock(1L);
         Point totalOrderPrice = product1.getPrice().multiply(2)
                 .add(product2.getPrice().multiply(3))
                 .add(product3.getPrice().multiply(1));
