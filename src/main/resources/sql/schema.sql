@@ -61,7 +61,6 @@ CREATE TABLE ISSUED_COUPON (
                                used_at DATETIME COMMENT '사용 일시',
                                user_id BIGINT NOT NULL,
                                coupon_id BIGINT NOT NULL,
-                               payment_id BIGINT COMMENT '(쿠폰이 사용된 경우) 사용된 결제 ID',
                                created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                                last_modified_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                                PRIMARY KEY (id)

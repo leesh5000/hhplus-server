@@ -1,9 +1,6 @@
 package kr.hhplus.be.server.product.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import kr.hhplus.be.server.common.domain.BaseEntity;
 import kr.hhplus.be.server.common.domain.BusinessException;
 import kr.hhplus.be.server.common.domain.ErrorCode;
@@ -14,7 +11,7 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Getter
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
-@Table(name = "product_inventory")
+@Table(name = "PRODUCT_INVENTORY")
 @Entity
 public class ProductInventory extends BaseEntity {
 
@@ -22,6 +19,7 @@ public class ProductInventory extends BaseEntity {
     @Id
     private Long id;
     // 정책 : 기본 상품 재고는 100개이다.
+    @Column(name = "stock")
     private Integer stock = 100;
 
     public ProductInventory(Integer stock) {

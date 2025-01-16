@@ -1,9 +1,6 @@
 package kr.hhplus.be.server.order.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import kr.hhplus.be.server.common.domain.BaseEntity;
 import kr.hhplus.be.server.common.domain.Point;
 import kr.hhplus.be.server.product.domain.Product;
@@ -14,7 +11,7 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Getter
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
-@Table(name = "order_product")
+@Table(name = "ORDER_PRODUCT")
 @Entity
 public class OrderProduct extends BaseEntity {
 
@@ -22,13 +19,19 @@ public class OrderProduct extends BaseEntity {
     @Id
     private Long id;
     private Integer quantity;
+    @Embedded
+    @AttributeOverride(name = "amount", column = @Column(name = "price"))
     private Point totalPrice;
-    private Long orderId;
+    @JoinColumn(name = "order_id", referencedColumnName = "id")
+    @ManyToOne(optional = false, cascade = CascadeType.PERSIST)
+    private Order order;
+    @Column(name = "product_id", nullable = false)
     private Long productId;
 
-    public OrderProduct(Integer quantity, Product product) {
+    public OrderProduct(Order order, Product product, Integer quantity) {
+        this.order = order;
+        this.productId = product.getId();
         this.quantity = quantity;
         this.totalPrice = product.getPrice().multiply(quantity);
-        this.productId = product.getId();
     }
 }

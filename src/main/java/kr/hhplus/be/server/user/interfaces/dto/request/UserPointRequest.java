@@ -2,7 +2,7 @@ package kr.hhplus.be.server.user.interfaces.dto.request;
 
 import kr.hhplus.be.server.common.domain.BusinessException;
 import kr.hhplus.be.server.common.domain.ErrorCode;
-import kr.hhplus.be.server.user.domain.service.dto.request.UsePointCommand;
+import kr.hhplus.be.server.user.domain.service.dto.request.ChargePointCommand;
 
 public record UserPointRequest(Integer amount) {
     public UserPointRequest {
@@ -14,8 +14,8 @@ public record UserPointRequest(Integer amount) {
         }
     }
 
-    public UsePointCommand toCommand(Long userId) {
-        return new UsePointCommand(
+    public ChargePointCommand toChargePointCommand(Long userId) {
+        return new ChargePointCommand(
                 userId,
                 amount
         );

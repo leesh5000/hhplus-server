@@ -1,9 +1,6 @@
 package kr.hhplus.be.server.product.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 import kr.hhplus.be.server.common.domain.BaseEntity;
 import kr.hhplus.be.server.common.domain.Point;
 import lombok.Getter;
@@ -14,6 +11,7 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Getter
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
+@Table(name = "PRODUCT")
 @Entity
 public class Product extends BaseEntity {
 
@@ -21,8 +19,11 @@ public class Product extends BaseEntity {
     @Id
     private Long id;
     private String name;
+    @Embedded
+    @AttributeOverride(name = "amount", column = @Column(name = "price"))
     private Point price;
-    @OneToOne(optional = false, cascade = ALL)
+    @OneToOne(fetch = FetchType.EAGER, optional = false, cascade = ALL)
+    @JoinColumn(name = "id", referencedColumnName = "product_id", nullable = false)
     private ProductInventory inventory = new ProductInventory();
 
     public Product(Long id, String name, Integer price, Integer stock) {
@@ -34,10 +35,6 @@ public class Product extends BaseEntity {
 
     public Integer getStock() {
         return inventory.getStock();
-    }
-
-    public Boolean isSaved() {
-        return id != null;
     }
 
     public void decreaseStock(Integer quantity) {

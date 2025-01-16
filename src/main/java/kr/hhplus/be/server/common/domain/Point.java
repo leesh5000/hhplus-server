@@ -18,11 +18,7 @@ public class Point {
         );
     }
 
-    public Point(
-            Long amount) {
-        if (amount < 0) {
-            throw new IllegalArgumentException("amount must be positive");
-        }
+    public Point(Long amount) {
         this.amount = amount;
     }
 
@@ -36,8 +32,13 @@ public class Point {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Point point = (Point) o;
+        if (o instanceof Number) {
+            long longValue = ((Number) o).longValue();
+            return amount.equals(longValue);
+        }
+        if (!(o instanceof Point point)) {
+            return false;
+        }
         return Objects.equals(amount, point.amount);
     }
 
@@ -68,5 +69,13 @@ public class Point {
 
     public Integer toInt() {
         return amount.intValue();
+    }
+
+    public Point subtract(Integer amount) {
+        return new Point(this.amount - amount);
+    }
+
+    public Boolean isNegative() {
+        return amount < 0;
     }
 }

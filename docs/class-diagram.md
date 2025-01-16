@@ -81,7 +81,7 @@ classDiagram
     class Payment {
         -id: Long
         -order: Order
-        -userCoupons: List~UserCoupon~
+        -issuedCoupons: List~UserCoupon~
         -amount: Money
         -paymentMethod: PaymentMethod
         -paymentState: PaymentState

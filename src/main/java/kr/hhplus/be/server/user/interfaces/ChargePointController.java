@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.hhplus.be.server.user.domain.service.UserService;
-import kr.hhplus.be.server.user.domain.service.dto.request.UsePointCommand;
+import kr.hhplus.be.server.user.domain.service.dto.request.ChargePointCommand;
 import kr.hhplus.be.server.user.interfaces.dto.request.UserPointRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -54,20 +54,29 @@ public class ChargePointController {
                     ),
                     @ApiResponse(
                             responseCode = "400",
-                            description = "포인트 충전 실패"
-                    )
+                            description = "입력값이 잘못된 경우"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "사용자를 찾을 수 없는 경우"
+                    ),
+                    @ApiResponse(
+                            responseCode = "409",
+                            description = "사용자 보유 포인트 한도 초과", content = @Content(
+                            schema = @Schema(implementation = Enum.EnumDesc.class)
+                    ))
             }
     )
     @PostMapping(value = "/api/v1/users/{userId}/points", consumes = "application/json")
     public ResponseEntity<Void> charge(
-            @PathVariable("userId") Long userId,
-            @RequestBody UserPointRequest request
+            @PathVariable("userId")
+            Long userId,
+            @RequestBody
+            UserPointRequest request
     ) {
 
-        UsePointCommand command = request.toCommand(userId);
-        userService.chargePoint(
-                command
-        );
+        ChargePointCommand command = request.toChargePointCommand(userId);
+        userService.chargePoint(command);
 
         URI userPointsUri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .build()
@@ -77,6 +86,5 @@ public class ChargePointController {
                 .header("Location", userPointsUri.toString())
                 .build();
     }
-
 
 }

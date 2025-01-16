@@ -10,19 +10,15 @@ public class UserFixture {
     }
 
     public static User create(Long id) {
-        Wallet wallet = WalletFixture.create(1L);
-        return new User(id, "유저", wallet);
+        return new User(id, "유저", 0L);
     }
 
     public static User create(Long id, Long initialPoint) {
-        return new User(id, "유저", initialPoint);
+        Wallet wallet = WalletFixture.create(1L, initialPoint);
+        return new User(id, "유저", wallet);
     }
 
     public static User create(Long id, Point maximumBalance) {
         return new User(id, "유저", maximumBalance.toLong());
-    }
-
-    public static User create(Long id, Wallet userWallet) {
-        return new User(id, "유저", userWallet);
     }
 }

@@ -22,8 +22,8 @@ public class Wallet extends BaseEntity {
     @AttributeOverride(name = "amount", column = @Column(name = "balance"))
     private Point balance = new Point(0);
 
-    private static final Point MINIMUM_BALANCE = new Point(0);
-    private static final Point MAXIMUM_BALANCE = new Point(1_000_000_000_000_000L);
+    public static final Point MINIMUM_BALANCE = new Point(0);
+    public static final Point MAXIMUM_BALANCE = new Point(1_000_000_000_000L);
 
     public Wallet(Long id) {
         this.id = id;
@@ -31,8 +31,8 @@ public class Wallet extends BaseEntity {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Wallet wallet = (Wallet) o;
+        if (this == o) return true;
+        if (!(o instanceof Wallet wallet)) return false;
         return Objects.equals(id, wallet.id);
     }
 
@@ -66,16 +66,17 @@ public class Wallet extends BaseEntity {
     }
 
     public WalletHistory withdraw(Integer amount) {
-        Point subtractPoint = new Point(amount);
-        balance = balance.subtract(subtractPoint);
+        verifyEnoughBalance(amount);
+        balance = balance.subtract(new Point(amount));
         return new WalletHistory(this, TransactionType.WITHDRAW, amount);
     }
 
-    public static Point getMaximumBalance() {
-        return MAXIMUM_BALANCE;
-    }
-
-    public static Point getMinimumBalance() {
-        return MINIMUM_BALANCE;
+    private void verifyEnoughBalance(Integer amount) {
+        if (balance.subtract(amount).isNegative()) {
+            throw new BusinessException(
+                    ErrorCode.INSUFFICIENT_BALANCE,
+                    "ID가 %d인 유저 지갑이 잔액이 부족합니다.".formatted(id)
+            );
+        }
     }
 }

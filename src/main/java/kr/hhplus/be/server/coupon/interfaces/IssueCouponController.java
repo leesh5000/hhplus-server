@@ -44,8 +44,8 @@ public class IssueCouponController {
                             headers = {
                                     @Header(
                                             name = "Location",
-                                            description = "발급된 쿠폰 URI",
-                                            schema = @Schema(type = "string", example = "/api/v1/users/1/coupons/1")
+                                            description = "사용자 쿠폰 목록 URI",
+                                            schema = @Schema(type = "string", example = "/api/v1/users/1/coupons")
                                     )
                             }
                     ),
@@ -67,9 +67,7 @@ public class IssueCouponController {
                 .build()
                 .toUri();
 
-        // Issue user coupon
-        return ResponseEntity.ok()
-                .header("Location", userCouponsUri.toString())
+        return ResponseEntity.created(userCouponsUri)
                 .build();
     }
 

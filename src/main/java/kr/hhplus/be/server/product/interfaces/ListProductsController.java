@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.hhplus.be.server.common.domain.dto.response.PageDetails;
 import kr.hhplus.be.server.product.domain.service.ProductService;
-import kr.hhplus.be.server.product.domain.service.dto.response.ListProductsDetail;
+import kr.hhplus.be.server.product.domain.service.dto.response.ListProductsResult;
 import kr.hhplus.be.server.product.interfaces.dto.response.ListProductsResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -31,13 +31,11 @@ public class ListProductsController {
                     @Parameter(
                             name = "page",
                             description = "페이지 번호",
-                            required = false,
                             example = "1"
                     ),
                     @Parameter(
                             name = "size",
                             description = "페이지 크기",
-                            required = false,
                             example = "20"
                     )
             },
@@ -62,7 +60,7 @@ public class ListProductsController {
             @RequestParam(value = "page", defaultValue = "1", required = false) int page,
             @RequestParam(value = "size", defaultValue = "20", required = false) int size
     ) {
-        PageDetails<List<ListProductsDetail>> pageDetails = service.list(page, size);
+        PageDetails<List<ListProductsResult>> pageDetails = service.list(page, size);
 
         List<ListProductsResponse> responses = pageDetails.content()
                 .stream()

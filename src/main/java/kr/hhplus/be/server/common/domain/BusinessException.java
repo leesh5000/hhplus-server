@@ -5,12 +5,12 @@ import lombok.Getter;
 @Getter
 public class BusinessException extends RuntimeException {
 
-    private final ErrorCode code;
+    private final ErrorCode errorCode;
     private final String logMessage;
 
-    public BusinessException(ErrorCode code, String logMessage) {
+    public BusinessException(ErrorCode errorCode, String logMessage) {
         super(logMessage);
-        this.code = code;
+        this.errorCode = errorCode;
         this.logMessage = logMessage;
     }
 }

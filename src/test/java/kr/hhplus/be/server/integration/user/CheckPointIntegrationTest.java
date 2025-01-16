@@ -9,17 +9,13 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlGroup;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 @DisplayName("API 통합 테스트 : 포인트 조회")
-@SqlGroup({
-        @Sql(value = "/sql/check_point_test_data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS),
-        @Sql(value = "/sql/delete_all_data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_CLASS)
-})
 @AutoConfigureMockMvc
 @SpringBootTest
 public class CheckPointIntegrationTest {
@@ -27,21 +23,34 @@ public class CheckPointIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @DisplayName("userId를 입력하여 포인트 조회에 성공하면," +
-            "200 응답과 " +
-            "응답 본문에 `userId`와 `point`가 포함되어야 한다.")
+    @DisplayName("""
+            ID가 1이고, 보유 포인트가 10000인 유저가 존재할 때,
+            
+            포인트 조회 요청을 하면,
+            
+            {200 OK} 응답과
+            응답 본문에 {point 필드가 10000} 이어야 한다.
+            """
+    )
+    @SqlGroup({
+            @Sql(scripts = "/sql/insert_10000_balance_user.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+            @Sql(scripts = "/sql/delete_10000_balance_user.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    })
     @Test
     void check_coupon_test() throws Exception {
 
-        // Mocking
-        // given
-        // when
+        // given : ID가 1이고, 보유 포인트가 10000인 유저가 존재 (resources/sql/data.sql 참고)
+        Long id = 100L;
+
+        // when : 포인트 조회 요청을 하면
         mockMvc.perform(
-                        MockMvcRequestBuilders.get("/api/v1/users/1/points")
+                        get("/api/v1/users/{userId}/points", id)
                                 .contentType(MediaType.APPLICATION_JSON)
+                            .contentType(MediaType.APPLICATION_JSON)
                 )
+                // then 1 : 200 OK 응답해야 한다.
                 .andExpect(status().isOk())
-                // 응답 본문에 `userId`와 `point`가 포함되어 있는지 확인
-                .andExpect(jsonPath("$.point").value(0));
+                // then 2 : 응답 본문에 point 필드가 10000 이어야 한다.
+                .andExpect(jsonPath("$.point").value(10000));
     }
 }

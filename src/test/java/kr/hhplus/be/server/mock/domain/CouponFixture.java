@@ -20,4 +20,24 @@ public class CouponFixture {
                 expiredAt
                 );
     }
+
+    public static Coupon create(Long id, Integer stock) {
+        LocalDateTime expiredAt = LocalDateTime.now()
+                .plusMonths(3);
+        return new Coupon(id,
+                "쿠폰",
+                1000L,
+                stock,
+                expiredAt
+        );
+    }
+
+    public static Coupon create(Long id, LocalDateTime expiredAt) {
+        return new Coupon(id,
+                "쿠폰",
+                1000L,
+                100,
+                expiredAt
+        );
+    }
 }

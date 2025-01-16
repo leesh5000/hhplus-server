@@ -1,16 +1,14 @@
 package kr.hhplus.be.server.user.domain.service;
 
 import jakarta.transaction.Transactional;
+import kr.hhplus.be.server.common.domain.Point;
 import kr.hhplus.be.server.user.domain.User;
-import kr.hhplus.be.server.user.domain.Wallet;
 import kr.hhplus.be.server.user.domain.WalletHistory;
 import kr.hhplus.be.server.user.domain.repository.UserRepository;
-import kr.hhplus.be.server.user.domain.service.dto.request.UsePointCommand;
+import kr.hhplus.be.server.user.domain.service.dto.request.ChargePointCommand;
 import kr.hhplus.be.server.user.domain.service.dto.response.CheckPointDetail;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @RequiredArgsConstructor
 @Transactional
@@ -19,17 +17,18 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public void chargePoint(UsePointCommand command) {
-        User user = command.user();
+    public void chargePoint(ChargePointCommand command) {
+
+        Long userId = command.userId();
         Integer amount = command.amount();
+
+        User user = this.getById(userId);
         WalletHistory walletHistory = user.chargePoint(amount);
         userRepository.save(walletHistory);
     }
 
-    public void usePoint(UsePointCommand command) {
-        User user = command.user();
-        Integer amount = command.amount();
-        WalletHistory walletHistory = user.deductPoint(amount);
+    public void usePoint(User user, Point point) {
+        WalletHistory walletHistory = user.deductPoint(point);
         userRepository.save(walletHistory);
     }
 
@@ -40,11 +39,5 @@ public class UserService {
 
     public User getById(Long userId) {
         return userRepository.getById(userId);
-    }
-
-    public List<WalletHistory> getWalletHistories(Long userId) {
-        User user = userRepository.getById(userId);
-        Wallet userWallet = user.getWallet();
-        return userRepository.findAllWalletHistories(userWallet);
     }
 }

@@ -1,20 +1,18 @@
 package kr.hhplus.be.server.coupon.domain.service;
 
 import jakarta.transaction.Transactional;
+import kr.hhplus.be.server.common.domain.BusinessException;
+import kr.hhplus.be.server.common.domain.ErrorCode;
 import kr.hhplus.be.server.common.domain.Point;
-import kr.hhplus.be.server.common.domain.service.ClockHolder;
+import kr.hhplus.be.server.common.domain.service.DateTimeHolder;
 import kr.hhplus.be.server.coupon.domain.Coupon;
 import kr.hhplus.be.server.coupon.domain.IssuedCoupon;
 import kr.hhplus.be.server.coupon.domain.repository.CouponRepository;
-import kr.hhplus.be.server.coupon.domain.service.dto.request.IssueCouponCommand;
-import kr.hhplus.be.server.coupon.domain.service.dto.request.UseCouponCommand;
 import kr.hhplus.be.server.coupon.domain.service.dto.response.UserCouponsDetail;
-import kr.hhplus.be.server.payment.domain.Payment;
 import kr.hhplus.be.server.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -23,38 +21,25 @@ import java.util.List;
 public class CouponService {
 
     private final CouponRepository couponRepository;
-    private final ClockHolder clockHolder;
+    private final DateTimeHolder dateTimeHolder;
 
     public List<IssuedCoupon> getIssuedCouponsByIds(List<Long> issuedCouponIds) {
         return couponRepository.findAllByIssuedCouponIds(issuedCouponIds);
     }
 
-    public Point calculateDiscountPoint(List<IssuedCoupon> issuedCouponIds) {
-        return issuedCouponIds.stream()
-                .map(IssuedCoupon::getDiscountAmount)
+    public IssuedCoupon getIssuedCouponById(Long issuedCouponId) {
+        return couponRepository.findIssuedCouponById(issuedCouponId)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.RESOURCE_NOT_FOUND,
+                        "ID가 %s인 발급된 쿠폰이 존재하지 않습니다.".formatted(issuedCouponId)
+                ));
+    }
+
+    public Point useCoupon(User couponOwner, List<Long> issuedCouponIds) {
+        List<IssuedCoupon> issuedCoupons = this.getIssuedCouponsByIds(issuedCouponIds);
+        return issuedCoupons.stream()
+                .map(issuedCoupon -> issuedCoupon.use(couponOwner, dateTimeHolder))
                 .reduce(Point.ZERO, Point::add);
-    }
-
-    public void useCoupon(UseCouponCommand command) {
-        User user = command.user();
-        Payment payment = command.payment();
-        command.issuedCoupons().forEach(
-                item -> item.use(
-                        user,
-                        clockHolder,
-                        payment.getId())
-
-        );
-    }
-
-    public void issueCoupon(IssueCouponCommand command) {
-        Coupon coupon = couponRepository.getById(
-                command.couponId()
-        );
-        IssuedCoupon issuedCoupon = coupon.issue(
-                command.user(), LocalDateTime.now()
-        );
-        couponRepository.saveIssuedCoupon(issuedCoupon);
     }
 
     public List<UserCouponsDetail> list(Long userId) {
@@ -62,5 +47,20 @@ public class CouponService {
                 .stream()
                 .map(UserCouponsDetail::from)
                 .toList();
+    }
+
+    public Coupon getById(Long couponId) {
+        return couponRepository.findById(couponId)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.RESOURCE_NOT_FOUND,
+                        "ID가 %s인 쿠폰이 존재하지 않습니다.".formatted(couponId)
+                ));
+    }
+
+    public void issue(Long couponId, User user) {
+        Coupon coupon = getById(couponId);
+        IssuedCoupon issuedCoupon = coupon.issue(user,
+                dateTimeHolder.now());
+        couponRepository.saveIssuedCoupon(issuedCoupon);
     }
 }

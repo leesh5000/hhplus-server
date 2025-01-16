@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-import static jakarta.persistence.FetchType.LAZY;
+import static jakarta.persistence.FetchType.EAGER;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "COUPON")
@@ -30,7 +30,7 @@ public class Coupon extends BaseEntity {
     @AttributeOverride(name = "amount", column = @Column(name = "discount_amount"))
     @Getter
     private Point discountAmount;
-    @OneToOne(fetch = LAZY, cascade = CascadeType.ALL, optional = false)
+    @OneToOne(fetch = EAGER, cascade = CascadeType.ALL, optional = false)
     @JoinColumn(name = "id", referencedColumnName = "coupon_id", nullable = false)
     private CouponInventory inventory;
     @Getter
@@ -73,10 +73,6 @@ public class Coupon extends BaseEntity {
 
     public boolean isExpire(LocalDateTime now) {
         return expiredAt.isBefore(now);
-    }
-
-    public boolean isSaved() {
-        return id != null;
     }
 
     public Integer getStock() {
