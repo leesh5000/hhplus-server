@@ -36,6 +36,7 @@ IntelliJ IDEA 에서 `ServerApplication` 클래스를 실행합니다.
 - [ERD](./docs/erd.md)````
 - [API 문서 (OAS 3)](./docs/e-commerce-api.yml)
   - 해당 문서를 [Swagger Editor](https://editor.swagger.io/)에 붙여넣으면 시각적으로 확인할 수 있습니다.
+- [동시성 문제 보고서](./docs/concurrency.md)
 
 # 공헌하기
 
