@@ -10,6 +10,8 @@ public interface CouponRepository {
     List<IssuedCoupon> findIssuedCouponsByUserId(Long userId);
     Optional<IssuedCoupon> findIssuedCouponById(Long issuedCouponId);
     Optional<Coupon> findByIdWithPessimisticLock(Long couponId);
-    void saveIssuedCoupon(IssuedCoupon issuedCoupon);
     List<IssuedCoupon> findAllByIssuedCouponIds(List<Long> issuedCouponIds);
+    void save(IssuedCoupon issuedCoupon);
+    void save(Coupon coupon);
+    void deleteAll();
 }

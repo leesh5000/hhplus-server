@@ -15,4 +15,5 @@ public interface ProductRepository {
     Optional<Product> findById(Long productId);
     List<TopSellingProductResult> queryPopularProducts(Integer days, Integer limit);
     Product getById(Long productId);
+    void save(Product product);
 }

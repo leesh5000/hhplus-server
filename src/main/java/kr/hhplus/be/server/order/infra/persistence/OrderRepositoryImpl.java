@@ -21,5 +21,10 @@ public class OrderRepositoryImpl implements OrderRepository {
         return orderJpaRepository.findById(orderId);
     }
 
+    @Override
+    public Long count() {
+        return orderJpaRepository.count();
+    }
+
     private final OrderJpaRepository orderJpaRepository;
 }

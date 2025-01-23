@@ -15,4 +15,6 @@ public interface UserRepository {
     User getById(Long userId) throws BusinessException;
     void save(WalletHistory walletHistory);
     List<WalletHistory> findAllWalletHistories(Wallet userWallet);
+    void save(User user);
+    void deleteAll();
 }

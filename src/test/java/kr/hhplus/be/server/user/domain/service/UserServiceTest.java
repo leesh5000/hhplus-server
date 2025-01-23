@@ -64,7 +64,7 @@ class UserServiceTest {
         UserService sut = testContainers.userService;
 
         // given : 보유 포인트가 최대 한도인 유저가 존재
-        User user = UserFixture.create(1L, MAXIMUM_BALANCE);
+        User user = UserFixture.create(1L, MAXIMUM_BALANCE.toLong());
         testContainers.userRepository.save(user);
 
         // when : 유저 1000 포인트를 충전하면

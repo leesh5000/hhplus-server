@@ -42,7 +42,7 @@ public class FakeCouponRepository implements CouponRepository {
     }
 
     @Override
-    public void saveIssuedCoupon(IssuedCoupon issuedCoupon) {
+    public void save(IssuedCoupon issuedCoupon) {
         issuedCouponData.add(issuedCoupon);
     }
 
@@ -60,12 +60,14 @@ public class FakeCouponRepository implements CouponRepository {
         }
     }
 
-    public void save(IssuedCoupon issuedCoupon) {
-        issuedCouponData.add(issuedCoupon);
-    }
-
     public void save(Coupon coupon) {
         couponData.add(coupon);
+    }
+
+    @Override
+    public void deleteAll() {
+        couponData.clear();
+        issuedCouponData.clear();
     }
 
     public Long countIssuedCouponsByUserId(Long userId) {

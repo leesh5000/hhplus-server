@@ -66,6 +66,11 @@ public class FakeUserRepository implements UserRepository {
         userData.add(user);
     }
 
+    @Override
+    public void deleteAll() {
+        userData.clear();
+    }
+
     public List<WalletHistory> findAllWalletHistories(User user) {
         return walletHistoryData.stream()
                 .filter(item -> item.getWallet().equals(user.getWallet()))

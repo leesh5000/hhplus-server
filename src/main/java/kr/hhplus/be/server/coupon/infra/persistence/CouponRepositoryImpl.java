@@ -34,8 +34,19 @@ public class CouponRepositoryImpl implements CouponRepository {
     }
 
     @Override
-    public void saveIssuedCoupon(IssuedCoupon issuedCoupon) {
+    public void save(IssuedCoupon issuedCoupon) {
         issuedCouponJpaRepository.save(issuedCoupon);
+    }
+
+    @Override
+    public void save(Coupon coupon) {
+        couponJpaRepository.save(coupon);
+    }
+
+    @Override
+    public void deleteAll() {
+        issuedCouponJpaRepository.deleteAll();
+        couponJpaRepository.deleteAll();
     }
 
     @Override

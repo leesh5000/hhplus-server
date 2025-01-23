@@ -1,6 +1,5 @@
 package kr.hhplus.be.server.coupon.domain.service;
 
-import jakarta.transaction.Transactional;
 import kr.hhplus.be.server.common.domain.BusinessException;
 import kr.hhplus.be.server.common.domain.ErrorCode;
 import kr.hhplus.be.server.common.domain.Point;
@@ -11,10 +10,13 @@ import kr.hhplus.be.server.coupon.domain.repository.CouponRepository;
 import kr.hhplus.be.server.coupon.domain.service.dto.response.UserCouponsDetail;
 import kr.hhplus.be.server.user.domain.User;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 @Transactional
 @Service
@@ -42,14 +44,14 @@ public class CouponService {
                 .reduce(Point.ZERO, Point::add);
     }
 
-    public List<UserCouponsDetail> list(Long userId) {
+    public List<UserCouponsDetail> listUserCoupons(Long userId) {
         return couponRepository.findIssuedCouponsByUserId(userId)
                 .stream()
                 .map(UserCouponsDetail::from)
                 .toList();
     }
 
-    public Coupon getByIdWithPessimisticLock(Long couponId) {
+    public Coupon getById(Long couponId) {
         return couponRepository.findByIdWithPessimisticLock(couponId)
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.RESOURCE_NOT_FOUND,
@@ -58,9 +60,10 @@ public class CouponService {
     }
 
     public void issue(Long couponId, User user) {
-        Coupon coupon = getByIdWithPessimisticLock(couponId);
+        Coupon coupon = getById(couponId);
         IssuedCoupon issuedCoupon = coupon.issue(user,
                 dateTimeHolder.now());
-        couponRepository.saveIssuedCoupon(issuedCoupon);
+        log.info("남은 쿠폰 수 : {}", coupon.getStock());
+        couponRepository.save(issuedCoupon);
     }
 }
