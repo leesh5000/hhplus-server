@@ -4,12 +4,17 @@ import kr.hhplus.be.server.common.domain.Point;
 import kr.hhplus.be.server.coupon.domain.Coupon;
 import kr.hhplus.be.server.coupon.domain.IssuedCoupon;
 import kr.hhplus.be.server.coupon.domain.service.CouponService;
+import kr.hhplus.be.server.mock.domain.ProductFixture;
+import kr.hhplus.be.server.mock.domain.UserFixture;
 import kr.hhplus.be.server.order.domain.Order;
 import kr.hhplus.be.server.order.domain.OrderProduct;
+import kr.hhplus.be.server.order.domain.repository.OrderRepository;
 import kr.hhplus.be.server.order.domain.service.OrderService;
 import kr.hhplus.be.server.product.domain.Product;
+import kr.hhplus.be.server.product.domain.repository.ProductRepository;
 import kr.hhplus.be.server.product.domain.service.ProductService;
 import kr.hhplus.be.server.user.domain.User;
+import kr.hhplus.be.server.user.domain.repository.UserRepository;
 import kr.hhplus.be.server.user.domain.service.UserService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -24,10 +29,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.util.concurrent.Executors.newFixedThreadPool;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -47,6 +57,12 @@ public class OrderAndPayControllerIntegrationTest {
     private CouponService couponService;
     @Autowired
     private OrderService orderService;
+    @Autowired
+    private OrderRepository orderRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private ProductRepository productRepository;
 
     @DisplayName("""
             사용자 ID, 주문할 상품 목록, 사용할 쿠폰 목록을 입력하여
@@ -81,7 +97,7 @@ public class OrderAndPayControllerIntegrationTest {
         Product product1 = productService.getById(100L);
         Product product2 = productService.getById(101L);
         Product product3 = productService.getById(102L);
-        Coupon coupon = couponService.getByIdWithPessimisticLock(1L);
+        Coupon coupon = couponService.getById(1L);
         Point totalOrderPrice = product1.getPrice().multiply(2)
                 .add(product2.getPrice().multiply(3))
                 .add(product3.getPrice().multiply(1));
@@ -160,6 +176,125 @@ public class OrderAndPayControllerIntegrationTest {
         Assertions.assertThat(order.getOrderPrice()).isEqualTo(totalOrderPrice);
 
     }
+
+    @DisplayName("""
+            동시에 50명의 유저가 각각 한 번씩
+            재고가 30개인 상품을 주문하면,
+            30개의 주문만 성공해야 하고, 상품은 재고가 0이 되어야 한다.
+            """)
+    @Test
+    void order_and_pay_test_concurrency() throws Exception {
+
+        // 50명의 유저 생성
+        int userCount = 50;
+        for (int i = 0; i < userCount; i++) {
+            User user = UserFixture.create();
+            userRepository.save(user);
+        }
+
+        // 상품 재고 30개로 초기화
+        productRepository.save(
+                ProductFixture.create(null, 30)
+        );
+
+        Product product = productService.getById(1L);
+        int stock = product.getStock();
+        Long totalOrderCount = orderRepository.count();
+
+        // 동시 요청을 위한 스레드 생성
+        ExecutorService executorService = newFixedThreadPool(50);
+        List<Callable<Boolean>> tasks = new ArrayList<>();
+
+        // when : 50명의 유저가 각각 한 번씩 재고가 30개인 상품을 주문한다.
+        for (int i = 0; i < 50; i++) {
+            tasks.add(() -> {
+                mockMvc.perform(
+                                MockMvcRequestBuilders.post("/api/v1/orders")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content("""
+                                                {
+                                                  "userId": 100,
+                                                  "products": [
+                                                    {
+                                                      "productId": 1,
+                                                      "quantity": 1
+                                                    }
+                                                  ],
+                                                  "applyCouponIds": []
+                                                }
+                                                """)
+                        )
+                        .andExpect(status().isCreated());
+                return true;
+            });
+        }
+
+        // 모든 작업을 동시 실행
+        executorService.invokeAll(tasks);
+        executorService.shutdown();
+
+        // then : 30개의 주문만 성공해야 하고, 상품은 재고가 0이 되어야 한다.
+        Product updatedProduct = productService.getById(1L);
+        Assertions.assertThat(updatedProduct.getStock()).isEqualTo(0);
+
+        // then : 30개의 주문만 성공해야 한다.
+        Long updatedOrderCount = orderRepository.count();
+        Assertions.assertThat(updatedOrderCount - totalOrderCount).isEqualTo(30);
+
+    }
+
+    @DisplayName("""
+            잔액이 100,000 포인트인 유저가
+            가격이 30,000 포인트인 상품을 동시에 4번 주문하면,
+            주문은 3개만 성공해야 하고, 잔액은 10,000 포인트이어야 한다.
+            """)
+    @Test
+    void order_and_pay_test_concurrency_with_point() throws Exception {
+
+        // given : 잔액이 100,000 포인트인 유저 생성
+        User user = UserFixture.create(100L, 100000L);
+        userRepository.save(user);
+
+        // given : 가격이 30,000 포인트인 상품 생성
+        Product product = ProductFixture.create(1L, 30000);
+        productRepository.save(product);
+
+        // when : 가격이 30,000 포인트인 상품을 동시에 4번 주문한다.
+        ExecutorService executorService = newFixedThreadPool(4);
+        List<Callable<Boolean>> tasks = new ArrayList<>();
+
+        for (int i = 0; i < 4; i++) {
+            tasks.add(() -> {
+                mockMvc.perform(
+                                MockMvcRequestBuilders.post("/api/v1/orders")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content("""
+                                                {
+                                                  "userId": 100,
+                                                  "products": [
+                                                    {
+                                                      "productId": 1,
+                                                      "quantity": 1
+                                                    }
+                                                  ],
+                                                  "applyCouponIds": []
+                                                }
+                                                """)
+                        )
+                        .andExpect(status().isCreated());
+                return true;
+            });
+        }
+
+        // 모든 작업을 동시 실행
+        executorService.invokeAll(tasks);
+        executorService.shutdown();
+
+        // then : 주문은 3개만 성공해야 하고, 잔액은 10,000 포인트이어야 한다.
+        User updatedUser = userService.getById(100L);
+        Assertions.assertThat(updatedUser.getPoint()).isEqualTo(10000L);
+    }
+
 
     private static void extractAndSetOrderIdFromLocation(MvcResult result, AtomicReference<Long> orderId) {
         String location = result.getResponse().getHeader("Location");
