@@ -3,6 +3,7 @@ package kr.hhplus.be.server.user.domain;
 import kr.hhplus.be.server.common.domain.BusinessException;
 import kr.hhplus.be.server.common.domain.ErrorCode;
 import kr.hhplus.be.server.common.domain.Point;
+import kr.hhplus.be.server.mock.domain.WalletFixture;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,7 +23,7 @@ class WalletTest {
     void charge() {
 
         // given : ID가 1인 지갑이 존재
-        Wallet wallet = new Wallet(1L);
+        Wallet wallet = WalletFixture.create(1L);
 
         // when : 1000원을 충전하면
         WalletHistory walletHistory = wallet.deposit(1000);
@@ -42,7 +43,7 @@ class WalletTest {
     @Test
     void getBalance() {
         // given
-        Wallet wallet = new Wallet(1L);
+        Wallet wallet = WalletFixture.create(1L);
 
         // when
         Point balance = wallet.getBalance();
@@ -63,7 +64,7 @@ class WalletTest {
     void withdraw() {
 
         // given : ID가 1인 지갑이 존재
-        Wallet wallet = new Wallet(1L);
+        Wallet wallet = WalletFixture.create(1L);
 
         // when : 1000원을 충전하고, 1000원을 출금하면
         wallet.deposit(1000);
@@ -88,7 +89,7 @@ class WalletTest {
     void withdraw_Fail() {
 
         // given : ID가 1이고, 잔고가 0원인 지갑이 존재
-        Wallet wallet = new Wallet(1L);
+        Wallet wallet = WalletFixture.create(1L);
 
         Assertions.assertThatThrownBy(
                 // when : 1000원을 인출하면

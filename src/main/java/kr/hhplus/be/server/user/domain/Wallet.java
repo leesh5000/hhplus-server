@@ -19,14 +19,27 @@ public class Wallet extends BaseEntity {
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     private Long id;
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private User user;
     @AttributeOverride(name = "amount", column = @Column(name = "balance"))
     private Point balance = new Point(0);
 
     public static final Point MINIMUM_BALANCE = new Point(0);
     public static final Point MAXIMUM_BALANCE = new Point(1_000_000_000_000L);
 
-    public Wallet(Long id) {
+    public Wallet(User user) {
+        this.user = user;
+    }
+
+    public Wallet(User user, Long initialPoint) {
+        this.user = user;
+        this.balance = new Point(initialPoint);
+    }
+
+    public Wallet(Long id, User user) {
         this.id = id;
+        this.user = user;
     }
 
     @Override

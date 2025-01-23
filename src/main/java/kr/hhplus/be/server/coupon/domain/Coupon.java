@@ -30,18 +30,21 @@ public class Coupon extends BaseEntity {
     @AttributeOverride(name = "amount", column = @Column(name = "discount_amount"))
     @Getter
     private Point discountAmount;
-    @OneToOne(fetch = EAGER, cascade = CascadeType.ALL, optional = false)
-    @JoinColumn(name = "id", referencedColumnName = "coupon_id", nullable = false)
-    private CouponInventory inventory;
+    @OneToOne(fetch = EAGER, cascade = CascadeType.ALL, optional = false, mappedBy = "coupon", orphanRemoval = true)
+    private CouponInventory inventory = new CouponInventory(this);
     @Getter
     @Column(name = "expired_at")
     private LocalDateTime expiredAt;
 
-    public Coupon(Long id, String name, Long discountAmount, Integer stock, LocalDateTime expiredAt) {
+    public Coupon(Long id,
+                  String name,
+                  Long discountAmount,
+                  Integer stock,
+                  LocalDateTime expiredAt) {
         this.id = id;
         this.name = name;
         this.discountAmount = new Point(discountAmount);
-        this.inventory = new CouponInventory(stock);
+        this.inventory = new CouponInventory(this, stock);
         this.expiredAt = expiredAt;
     }
 

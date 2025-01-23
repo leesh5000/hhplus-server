@@ -15,4 +15,13 @@ public class ProductFixture {
                 100
         );
     }
+
+    public static Product create(Long id, int price) {
+        return new Product(
+                id,
+                "상품" + id,
+                price,
+                100
+        );
+    }
 }

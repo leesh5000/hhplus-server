@@ -17,9 +17,17 @@ public class CouponInventory extends BaseEntity {
     private Long id;
     @Getter
     private Integer stock = 500;
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "coupon_id", referencedColumnName = "id")
+    private Coupon coupon;
 
-    public CouponInventory(Integer stock) {
+    public CouponInventory(Coupon coupon, Integer stock) {
+        this.coupon = coupon;
         this.stock = stock;
+    }
+
+    public CouponInventory(Coupon coupon) {
+        this.coupon = coupon;
     }
 
     public void decreaseStock() {
