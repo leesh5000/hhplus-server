@@ -52,7 +52,7 @@ public class ListCouponsController {
             @PathVariable("userId") Long userId
     ) {
 
-        List<ListCouponsResponse> responses = couponService.list(userId)
+        List<ListCouponsResponse> responses = couponService.listUserCoupons(userId)
                 .stream()
                 .map(ListCouponsResponse::from)
                 .toList();

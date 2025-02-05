@@ -3,10 +3,11 @@ package kr.hhplus.be.server.user.domain;
 import jakarta.persistence.*;
 import kr.hhplus.be.server.common.domain.BaseEntity;
 import kr.hhplus.be.server.common.domain.Point;
-import kr.hhplus.be.server.coupon.domain.Coupon;
 import kr.hhplus.be.server.coupon.domain.IssuedCoupon;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 import static jakarta.persistence.FetchType.EAGER;
 
@@ -20,9 +21,8 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     private Long id;
     private String name;
-    @OneToOne(fetch = EAGER, cascade = CascadeType.ALL, optional = false)
-    @JoinColumn(name = "id", referencedColumnName = "user_id", nullable = false)
-    private Wallet wallet = new Wallet();
+    @OneToOne(fetch = EAGER, cascade = CascadeType.ALL, optional = false, mappedBy = "user", orphanRemoval = true)
+    private Wallet wallet = new Wallet(this);
     @Embedded
     private final MyCoupons myCoupons = new MyCoupons();
 
@@ -31,16 +31,10 @@ public class User extends BaseEntity {
         this.name = name;
     }
 
-    public User(Long id, String name, Long point) {
+    public User(Long id, String name, Long initialPoint) {
         this.id = id;
         this.name = name;
-        wallet.deposit(point);
-    }
-
-    public User(Long id, String name, Wallet wallet) {
-        this.id = id;
-        this.name = name;
-        this.wallet = wallet;
+        this.wallet = new Wallet(this, initialPoint);
     }
 
     public WalletHistory chargePoint(Integer amount) {
@@ -57,6 +51,11 @@ public class User extends BaseEntity {
 
     public WalletHistory deductPoint(Point deductPoint) {
         return wallet.withdraw(deductPoint.toInt());
+    }
+
+    public MyCoupons getMyCoupons(Long couponId) {
+        List<IssuedCoupon> issuedCouponsByCouponId = myCoupons.list(couponId);
+        return new MyCoupons(issuedCouponsByCouponId);
     }
 
 }

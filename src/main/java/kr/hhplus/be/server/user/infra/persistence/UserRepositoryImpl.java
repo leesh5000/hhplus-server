@@ -45,4 +45,14 @@ public class UserRepositoryImpl implements UserRepository {
         return walletHistoryJpaRepository.findAllByWallet(userWallet);
     }
 
+    @Override
+    public void save(User user) {
+        userJpaRepository.save(user);
+    }
+
+    @Override
+    public void deleteAll() {
+        userJpaRepository.deleteAll();
+    }
+
 }

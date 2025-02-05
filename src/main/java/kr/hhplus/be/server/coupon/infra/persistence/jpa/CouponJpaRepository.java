@@ -13,5 +13,4 @@ public interface CouponJpaRepository extends JpaRepository<Coupon, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Coupon> findById(Long couponId);
-
 }

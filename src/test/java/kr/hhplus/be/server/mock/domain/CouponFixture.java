@@ -10,6 +10,26 @@ public class CouponFixture {
         // do nothing
     }
 
+    public static Coupon create(LocalDateTime expiredAt) {
+        return new Coupon(null,
+                "쿠폰",
+                1000L,
+                100,
+                expiredAt
+        );
+    }
+
+    public static Coupon create(Integer stock) {
+        LocalDateTime expiredAt = LocalDateTime.now()
+                .plusMonths(3);
+        return new Coupon(null,
+                "쿠폰",
+                1000L,
+                stock,
+                expiredAt
+        );
+    }
+
     public static Coupon create(Long id) {
         LocalDateTime expiredAt = LocalDateTime.now()
                 .plusMonths(3);
