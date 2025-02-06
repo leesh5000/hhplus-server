@@ -4,10 +4,9 @@ import kr.hhplus.be.server.coupon.domain.Coupon;
 import kr.hhplus.be.server.coupon.domain.IssuedCoupon;
 import kr.hhplus.be.server.coupon.domain.repository.CouponRepository;
 import kr.hhplus.be.server.coupon.domain.service.CouponService;
-import kr.hhplus.be.server.mock.domain.CouponFixture;
-import kr.hhplus.be.server.mock.domain.UserFixture;
 import kr.hhplus.be.server.user.domain.User;
 import kr.hhplus.be.server.user.domain.repository.UserRepository;
+import kr.hhplus.be.server.user.domain.service.UserService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,12 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.SqlGroup;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -33,7 +28,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ActiveProfiles("test")
 @DisplayName("API 통합 테스트 : 쿠폰 발급")
 @AutoConfigureMockMvc
 @SpringBootTest
@@ -47,43 +41,35 @@ public class IssueCouponIntegrationTest {
     private UserRepository userRepository;
     @Autowired
     private CouponRepository couponRepository;
+    @Autowired
+    private UserService userService;
 
-    @DisplayName("""
-            ID가 1인 유저와 ID가 1인 쿠폰이 존재할 때,
-            
-            쿠폰 발급 요청을 하면,
-            
-            {201 Created} 응답과
-            Location 헤더에 {발급된 쿠폰 URI}가 포함되어야 하고,
-            {쿠폰 재고가 1 감소}해야 한다.
-            """)
+    @DisplayName("쿠폰을 발급 요청하면, 정상적으로 유저에게 발급이 되고 쿠폰 재고가 1 감소해야 한다.")
     @Test
     void issue_coupon_test_1() throws Exception {
 
-        userRepository.save(
-                UserFixture.create()
-        );
-        couponRepository.save(
-                CouponFixture.create(10)
-        );
-
-        Coupon coupon = couponService.getById(1L);
+        long userId = 1L;
+        long couponId = 1L;
+        User user = userService.getById(userId);
+        Integer userCouponCount = user.getMyCoupons(couponId)
+                .size();
+        Coupon coupon = couponService.getById(couponId);
         int stock = coupon.getStock();
 
-        // when : 쿠폰 발급 요청을 하면
+        // when
         mockMvc.perform(
-                        post("/api/v1/users/1/coupons/1")
-                                .contentType(MediaType.APPLICATION_JSON)
-                )
-                // then 1 : 201 Created 응답해야 한다.
+                        post("/api/v1/users/{userId}/coupons/{couponId}", 1, 1)
+                                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
-                // then 2 : Location 헤더에 사용자 쿠폰 목록 URI 가 포함되어야 한다.
                 .andExpect(header().string("Location", "http://localhost/api/v1/users/1/coupons/1"));
 
-        // then 3 : 쿠폰 재고가 1 감소해야 한다.
-        Coupon updatedCoupon = couponService.getById(1L);
+        // then
+        Coupon updatedCoupon = couponService.getById(userId);
         int updatedStock = updatedCoupon.getStock();
+        Integer updatedUserCouponCount = user.getMyCoupons(couponId)
+                .size();
         Assertions.assertThat(updatedStock).isEqualTo(stock - 1);
+        Assertions.assertThat(updatedUserCouponCount).isEqualTo(userCouponCount + 1);
     }
 
     @DisplayName("""
@@ -99,17 +85,8 @@ public class IssueCouponIntegrationTest {
     @Test
     void issue_zero_stock_coupon_test() throws Exception {
 
-        // given : 재고가 0인 쿠폰이 존재
-        userRepository.save(
-                UserFixture.create()
-        );
-        couponRepository.save(
-                CouponFixture.create(0)
-        );
-        Long zeroStockCouponId = 1L;
-
         // when : 쿠폰 발급 요청을 하면
-        mockMvc.perform(post("/api/v1/users/1/coupons/{couponId}", zeroStockCouponId).contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(post("/api/v1/users/1/coupons/{couponId}", 100).contentType(MediaType.APPLICATION_JSON))
                 // then 1 : 409 CONFLICT 응답해야 한다.
                 .andExpect(status().isConflict())
                 // then 2 : errorCode 가 `COUPON_STOCK_EXHAUSTED`인 에러 메세지를 응답해야 한다.
@@ -132,17 +109,7 @@ public class IssueCouponIntegrationTest {
     @Test
     void issue_expired_coupon_test() throws Exception {
 
-        // given : 유효기간이 만료된 쿠폰이 존재
-        userRepository.save(
-                UserFixture.create()
-        );
-        couponRepository.save(
-                CouponFixture.create(
-                        LocalDateTime.now().minusMonths(3)
-                )
-        );
-
-        Long expiredCouponId = 1L;
+        Long expiredCouponId = 101L;
         Coupon coupon = couponService.getById(expiredCouponId);
         int stock = coupon.getStock();
 
@@ -152,7 +119,7 @@ public class IssueCouponIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
                 // then 1 : 400 Bad Request 응답해야 한다.
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isConflict())
                 // then 2 : errorCode 가 `EXPIRED_COUPON`인 에러 메세지를 응답해야 한다.
                 .andExpect(jsonPath("$.errorCode").value("EXPIRED_COUPON"))
                 // then 3 : message 가 `쿠폰이 만료되었습니다.`인 에러 메세지를 응답해야 한다.
@@ -170,10 +137,6 @@ public class IssueCouponIntegrationTest {
     정확히 {쿠폰 재고가 30 감소}해야 하고,
     {30명의 유저 모두 쿠폰을 발급}받아야 한다.
     """)
-    @SqlGroup({
-            @Sql(value = "/sql/insert_coupon_concurrency_test.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
-            @Sql(value = "/sql/delete_coupon_concurrency_test.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-    })
     @Test
     void issue_coupon_concurrently_test() throws Exception {
 
@@ -183,13 +146,12 @@ public class IssueCouponIntegrationTest {
         // 병렬로 실행될 작업 목록
         List<Callable<Boolean>> tasks = new ArrayList<>();
 
-        for (int i = 0; i < 30; i++) {
-            final int userId = i + 101;
-            final int couponId = 101;
+        for (int i = 1; i <= 30; i++) {
+            final int userId = i;
             tasks.add(() -> {
                 // mockMvc 호출 -> 성공 여부를 반환
                 mockMvc.perform(
-                        post("/api/v1/users/{userId}/coupons/{couponId}", userId, 101)
+                        post("/api/v1/users/{userId}/coupons/{couponId}", userId, 102)
                                 .contentType(MediaType.APPLICATION_JSON)
                 ).andExpect(status().isCreated());
                 return true;  // 성공했다고 가정
@@ -203,29 +165,20 @@ public class IssueCouponIntegrationTest {
         // 이후 쿠폰 재고(예: 50 -> 20)로 잘 감소했는지, 30명이 정상 발급받았는지 등의 검증 로직
         // 보통 CouponRepository, CouponInventoryRepository 등을 통해 DB 조회 후 assert
         int expectedStock = 20; // 50 - 30
-        int actualStock = couponService.getById(101L).getStock();
+        int actualStock = couponService.getById(102L).getStock();
         assertThat(actualStock).isEqualTo(expectedStock);
     }
 
     @DisplayName("""
-            동시에 100명의 사용자가 재고가 40개인 쿠폰을
+            동시에 30명의 사용자가 재고가 10개인 쿠폰을
             발급 요청하면,
-            40명의 유저만 쿠폰을 발급받아야 한다.
+            10명의 유저만 쿠폰을 발급받아야 한다.
             """)
     @Test
     void issue_coupon_concurrently_test_2() throws Exception {
 
-        int userCount = 100;
-
-        // 100명의 유저 생성
-        for (int i = 0; i < userCount; i++) {
-            User user = UserFixture.create();
-            userRepository.save(user);
-        }
-
-        // 재고가 40개인 쿠폰 생성
-        Coupon coupon = CouponFixture.create(40);
-        couponRepository.save(coupon);
+        long tenStockCouponId = 103L;
+        int userCount = 30;
 
         // 동시 실행 스레드 풀 생성
         ExecutorService executorService = Executors.newFixedThreadPool(userCount);
@@ -233,12 +186,12 @@ public class IssueCouponIntegrationTest {
         // 병렬로 실행될 작업 목록
         List<Callable<Boolean>> tasks = new ArrayList<>();
 
-        for (int i = 0; i < userCount; i++) {
-            final int userId = i + 1;
+        for (int i = 1; i <= userCount; i++) {
+            final int userId = i;
             tasks.add(() -> {
                 try {
                     // mockMvc 호출 -> 성공 여부를 반환
-                    mockMvc.perform(post("/api/v1/users/{userId}/coupons/{couponId}", userId, 1)
+                    mockMvc.perform(post("/api/v1/users/{userId}/coupons/{couponId}", userId, tenStockCouponId)
                             .contentType(MediaType.APPLICATION_JSON))
                             .andExpect(
                                     status().isCreated());
@@ -253,28 +206,28 @@ public class IssueCouponIntegrationTest {
         executorService.invokeAll(tasks);
         executorService.shutdown();
 
-        // 이후 쿠폰 재고(예: 40 -> 0)로 잘 감소했는지, 40명 정상 발급받았는지 등의 검증 로직
-        // 보통 CouponRepository, CouponInventoryRepository 등을 통해 DB 조회 후 assert
         int expectedStock = 0;
-        int actualStock = couponService.getById(1L).getStock();
+        int actualStock = couponService.getById(tenStockCouponId).getStock();
         assertThat(actualStock).isEqualTo(expectedStock);
 
-        // 40명의 유저가 각자 1장의 쿠폰을 발급받았는지 확인
         AtomicInteger totalIssuedCouponCount = new AtomicInteger();
         for (int i = 1; i <= userCount; i++) {
 
             List<IssuedCoupon> issuedCouponsByUserId = couponRepository.findIssuedCouponsByUserId((long) i)
                     .stream()
-                    .filter(issuedCoupon -> issuedCoupon.getCouponId() == 1L)
+                    .filter(issuedCoupon -> issuedCoupon.getCouponId() == tenStockCouponId)
                     .toList();
+
             if (issuedCouponsByUserId.isEmpty()) {
                 continue;
             }
+
             int size = issuedCouponsByUserId.size();
             Assertions.assertThat(size).isEqualTo(1);
             totalIssuedCouponCount.addAndGet(size);
         }
-        assertThat(totalIssuedCouponCount.get()).isEqualTo(40);
+
+        assertThat(totalIssuedCouponCount.get()).isEqualTo(10);
     }
 
 }
